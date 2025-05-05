@@ -11,7 +11,7 @@ public abstract class Items {
         return nama;
     }
 
-    public double getHarga() {
+    public double getBuyPrice() {
         return harga;
     }
 }
