@@ -1,3 +1,4 @@
 public interface Edible {
-    void getEnergyRestore();
+    public int EnergyRestore=0;
+    public void getEnergyRestore();
 }
