@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.ArrayList;
 
 public class NPC {
     private String name;
@@ -13,6 +14,7 @@ public class NPC {
     private List<Items> likedItems;
     private List<Items> hatedItems;
     public static final int MAX_HEART_POINTS = 150;
+    private static List<NPC> listOfNPC = new ArrayList<>();
 
     public NPC(String name, Gender gender, int heartPoints, List<String> dialogues, RelationshipStatus relationshipStatus, int freqChat, int freqGift, int freqVisit, List<Items> lovedItems, List<Items> likedItems, List<Items> hatedItems) {
         this.name = name;
@@ -26,6 +28,7 @@ public class NPC {
         this.lovedItems = lovedItems;
         this.likedItems = likedItems;
         this.hatedItems = hatedItems;
+        listOfNPC.add(this);
     }
 
     public String getName() {
@@ -72,5 +75,11 @@ public class NPC {
     public void setRelationshipStatus(RelationshipStatus relationshipStatus) {
         this.relationshipStatus = relationshipStatus;
     }
+
+    public static List<NPC> getListOfNPC() {
+        return listOfNPC;
+    }
+
+
 }
 
