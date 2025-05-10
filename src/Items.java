@@ -1,17 +1,23 @@
 public abstract class Items {
-    private String nama;
-    private double harga;
+    private String itemName;
+    private int buyPrice;
+    private int sellPrice;
 
-    public Items(String nama, double harga) {
-        this.nama = nama;
-        this.harga = harga;
+    public Items(String itemName, int buyPrice, int sellPrice) {
+        this.itemName = itemName;
+        this.buyPrice = buyPrice;
+        this.sellPrice = sellPrice;
     }
 
-    public String getNama() {
-        return nama;
+    public String getItemName() {
+        return itemName;
     }
 
-    public double getBuyPrice() {
-        return harga;
+    public int getBuyPrice() {
+        return buyPrice;
+    }
+
+    public int getSellPrice() {
+        return sellPrice;
     }
 }
