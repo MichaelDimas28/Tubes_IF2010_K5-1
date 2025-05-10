@@ -1,0 +1,22 @@
+public interface Action{
+    public void tile();
+    public void recoverLand();
+    public void plant();
+    public void water();
+    public void harvest();
+    public void eat();
+    public void sleep();
+    public void cook();
+    public void fish();
+    public void propose();
+    public void marry();
+    public void watch();
+    public void visit();
+    public void chat();
+    public void gift();
+    public void move();
+    public void openInventory();
+    public void showTime();
+    public void showLocation();
+    public void sell();
+}
