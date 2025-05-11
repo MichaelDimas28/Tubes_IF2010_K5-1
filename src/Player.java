@@ -1,5 +1,6 @@
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Player implements Action{
     private String name;
@@ -150,8 +151,8 @@ public class Player implements Action{
     }
 
     public void setCoordinate(Coordinate coordinate){
-        this.coordinate.column = this.coordinate.setColumn(coordinate.getColumn());
-        this.coordinate.row = this.coordinate.setRow(coordinate.getRow);
+        this.coordinate.setColumn(coordinate.getColumn());
+        this.coordinate.setRow(coordinate.getRow());
     }
 
     //Inventory
@@ -161,7 +162,7 @@ public class Player implements Action{
     
     //NPC
     public List<NPC> getRelationshipStatus(){
-        return relationshipStatus;
+        return npcRelationshipStats;
     }
 
     //Action
@@ -177,7 +178,7 @@ public class Player implements Action{
         }
     }
 
-    public void plant(Seed seed){
+    public void plant(Seeds seed){
         setEnergy(getEnergy() - 5);
     }
 
@@ -191,7 +192,7 @@ public class Player implements Action{
         setEnergy(getEnergy() - 5);
     }
 
-    public void eat(Items food){
+    public void eat(Food food){
         setEnergy(getEnergy() + food.getEnergyRestore());
     }
 
@@ -204,9 +205,81 @@ public class Player implements Action{
         }
     }
 
-    public void cook(Items recipe){
+    public void cook(Food food) {
+        if (!food.getRecipeAquiredStatus()) {
+            System.out.println("Resep belum diperoleh.");
+            return;
+        }
+
+        String[] ingredients = food.getIngredients();
+        List<InventoryItem> itemsToConsume = new ArrayList<>();
+        boolean hasAllIngredients = true;
+
+        // Cek apakah semua bahan tersedia
+        for (String ingredient : ingredients) {
+            boolean found = false;
+            for (InventoryItem invItem : inventory.getItems()) {
+                if (invItem.getItem().getItemName().equals(ingredient) && invItem.getQuantity() >= 1) {
+                    itemsToConsume.add(invItem); // siapkan untuk dikonsumsi
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                hasAllIngredients = false;
+                break;
+            }
+        }
+
+        // Cek bahan bakar (Firewood / Coal)
+        InventoryItem fuel = null;
+        for (InventoryItem invItem : inventory.getItems()) {
+            String name = invItem.getItem().getItemName();
+            if ((name.equals("Firewood") || name.equals("Coal")) && invItem.getQuantity() >= 1) {
+                fuel = invItem;
+                break;
+            }
+        }
+
+        if (!hasAllIngredients || fuel == null) {
+            System.out.println("Gagal memasak. Bahan atau bahan bakar tidak cukup.");
+            return;
+        }
+
+        // Konsumsi bahan
+        for (InventoryItem item : itemsToConsume) {
+            item.setQuantity(item.getQuantity() - 1);
+            if (item.getQuantity() <= 0) {
+                inventory.removeItem(item);
+            }
+        }
+
+        // Konsumsi bahan bakar
+        fuel.setQuantity(fuel.getQuantity() - 1); // atau -0.5 kalau kamu ingin Coal bisa masak 2x
+        if (fuel.getQuantity() <= 0) {
+            inventory.removeItem(fuel);
+        }
+
+        // Tambahkan makanan hasil masakan
+        boolean alreadyExists = false;
+        for (InventoryItem invItem : inventory.getItems()) {
+            if (invItem.getItem().getItemName().equals(food.getItemName())) {
+                invItem.setQuantity(invItem.getQuantity() + 1);
+                alreadyExists = true;
+                break;
+            }
+        }
+        if (!alreadyExists) {
+            inventory.addItem(new InventoryItem(food, 1));
+        }
+
+        // Kurangi energi
         setEnergy(getEnergy() - 10);
+
+        System.out.println("Berhasil memasak " + food.getItemName() + " dan menambahkannya ke inventory.");
     }
+
+
 
     public void fish(){
         if(this.getItemHeld().getItemName() == "Fishing Rod"){
@@ -239,7 +312,7 @@ public class Player implements Action{
         setEnergy(getEnergy() - 10);
     }
 
-    public void gift(Items goods){
+    public void gift(Items goods, NPC npc){
         npc.receiveGift(goods);
         setEnergy(getEnergy() - 5);
     }
@@ -248,11 +321,14 @@ public class Player implements Action{
         this.setCoordinate(coordinate);
     }
 
-    public void openInventory(){
-        for(Items item : this.getInventory()){
-            System.out.println(item.getItemName);
-            System.out.println("Buy Price: " + item.getBuyPrice());
-            System.out.println("Sell Price: " + item.getSellPrice());
+    public void openInventory() {
+        System.out.println("Isi Inventory:");
+        for (InventoryItem inventoryItem : inventory.getItems()) {
+            Items item = inventoryItem.getItem();
+            System.out.println("- " + item.getItemName() +
+                            " | Qty: " + inventoryItem.getQuantity() +
+                            " | Buy Price: " + item.getBuyPrice() +
+                            " | Sell Price: " + item.getSellPrice());
         }
     }
 
@@ -261,4 +337,19 @@ public class Player implements Action{
     public void showLocation(){}
 
     public void sell(Items item){}
+
+    public void gift() {
+        if (itemHeld == null) {
+            System.out.println("Kamu tidak memegang item apa pun.");
+            return;
+        }
+
+        for (NPC npc : npcRelationshipStats) {
+            npc.receiveGift(itemHeld);
+            System.out.println("Kamu memberi hadiah kepada " + npc.getName());
+            break;
+        }
+
+        setEnergy(getEnergy() - 5);
+    }
 }

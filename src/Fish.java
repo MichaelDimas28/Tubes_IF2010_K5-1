@@ -45,8 +45,8 @@ public class Fish extends Items implements Edible {
         return rarity;
     }
 
-    public void getEnergyRestore(){
-        return;
+    public int getEnergyRestore(){
+        return this.energi;
     }
     
 }

@@ -7,7 +7,7 @@ public class Food extends Items implements Edible{
         super(itemName, buyPrice, sellPrice);
         recipeAquiredStatus = false;
         this.ingredients = ingredients;
-
+        this.energy = energy;
     }
 
     public void setRecipeAquiredStatus(Boolean recipeAquiredStatus) {
@@ -22,8 +22,8 @@ public class Food extends Items implements Edible{
         return ingredients;
     }
 
-    public void getEnergyRestore(){
-        return;
+    public int getEnergyRestore(){
+        return this.energy;
     }
 
 }

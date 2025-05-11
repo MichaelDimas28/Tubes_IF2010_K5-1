@@ -12,7 +12,7 @@ public class Crops extends Items implements Edible{
         return harvestAmount;
     }
 
-    public void getEnergyRestore(){
-        return;
+    public int getEnergyRestore(){
+        return this.energy;
     }
 }
