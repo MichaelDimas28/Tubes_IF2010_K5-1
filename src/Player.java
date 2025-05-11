@@ -1,36 +1,24 @@
 import java.util.List;
+import java.util.ArrayList;
 
 public class Player implements Action{
     private String name;
     private Gender gender;
-    private int energy;
+    private int energy = 100;
     private int gold;
-    private Items itemHeld;
-    private Map currentMap;
-    private int total_income;
-    private int total_expenditure;
-    private float avarage_season_income;
-    private float avarage_season_expenditure;
-    private int total_days_played;
-    private int crops_harvested;
-    private int fish_caught;
-    private Coordinate coordinate;
-    private Inventory inventory;
-    private List<NPC> npcRelationshipStats = NPC.getListOfNPC();
-
-    energy = 100;
-    itemHeld = null;
-    currentMap = null;
-    total_income = 0;
-    total_expenditure = 0;
-    avarage_season_income = 0;
-    avarage_season_expenditure = 0;
-    total_days_played = 0;
-    crops_harvested = 0;
-    fish_caught = 0;
-    coordinate = new Coordinate(0,0);
-    inventory = new Inventory();
-
+    private Items itemHeld = null;
+    private Map currentMap = null;
+    private int total_income = 0;
+    private int total_expenditure = 0;
+    private float avarage_season_income = 0;
+    private float avarage_season_expenditure = 0;
+    private int total_days_played = 0;
+    private int crops_harvested = 0;
+    private int fish_caught = 0;
+    private Coordinate coordinate = new Coordinate(0,0);
+    private Inventory inventory = new Inventory();
+    private List<NPC> npcRelationshipStats = new ArrayList<>();
+   
     //Constructor
     public Player(String name, Gender gender, int energy, int gold){
         this.name = name;
@@ -112,7 +100,7 @@ public class Player implements Action{
     }
 
     //Avarage Season Income
-    public int getAvgSeasonIncome(){
+    public float getAvgSeasonIncome(){
         return avarage_season_income;
     }
 
@@ -121,7 +109,7 @@ public class Player implements Action{
     }
 
     //Avarage Season Expenditure
-    public int getAvgSeasonExpenditure(){
+    public float getAvgSeasonExpenditure(){
         return avarage_season_expenditure;
     }
 
@@ -162,7 +150,7 @@ public class Player implements Action{
     }
 
     public void setCoordinate(Coordinate coordinate){
-        this.coordinate.column = this.coordinate.setColumn(coordinate.getColumn);
+        this.coordinate.column = this.coordinate.setColumn(coordinate.getColumn());
         this.coordinate.row = this.coordinate.setRow(coordinate.getRow);
     }
 
