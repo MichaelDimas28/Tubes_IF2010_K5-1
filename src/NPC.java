@@ -48,11 +48,11 @@ public class NPC {
 
     public void receiveGift(Items item) {
         if (lovedItems.contains(item)) {
-            setHeartPoints(getHeartPoints() + 10);
+            setHeartPoints(getHeartPoints() + 20);
         } else if (likedItems.contains(item)) {
-            setHeartPoints(getHeartPoints() + 5);
+            setHeartPoints(getHeartPoints() + 20);
         } else if (hatedItems.contains(item)) {
-            setHeartPoints(getHeartPoints() - 10);
+            setHeartPoints(getHeartPoints() - 25);
         } 
     }
 
