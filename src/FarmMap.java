@@ -8,8 +8,6 @@ public class FarmMap extends Map {
     }
 
     public static void main(String args[]) {
-        
-        
         Random random = new Random();
         int mapNumber = random.nextInt(3) + 1;
         
