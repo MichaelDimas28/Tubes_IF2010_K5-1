@@ -1,8 +1,34 @@
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-public class Player implements Action{
+import javax.imageio.ImageIO;
+
+// import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+// import java.util.HashMap;
+
+public class Player implements Action {
+    public int worldX, worldY;
+    public int speed;
+    public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
+    public String direction;
+    public int spriteCounter = 0;
+    public int spriteNum = 1;
+    public Rectangle solidArea; //hitbox karakter player
+    public boolean collisionOn = false;
+
+    GamePanel gp;
+    KeyHandler keyH;
+
+    public final int screenX;
+    public final int screenY;
+    int standCounter = 0; //counter agar player kembali ke gambar idle ketika tidak ada input
+    boolean moving = false;
+    int pixelCounter = 0;
+
     private String name;
     private Gender gender;
     private int energy = 100;
@@ -21,11 +47,155 @@ public class Player implements Action{
     private List<NPC> npcRelationshipStats = new ArrayList<>();
    
     //Constructor
-    public Player(String name, Gender gender, int energy, int gold){
+    public Player(String name, Gender gender, int energy, int gold, GamePanel gp, KeyHandler keyH){
         this.name = name;
         this.gender = gender;
         this.energy = energy;
         this. gold = gold;
+        this.gp = gp;
+        this.keyH = keyH;
+
+        screenX = gp.screenWidth/2 - (gp.tileSize/2);
+        screenY = gp.screenHeight/2 - (gp.tileSize/2);
+
+        solidArea = new Rectangle();
+        solidArea.x = 1;
+        solidArea.y = 1;
+        solidArea.width = 46;
+        solidArea.height = 46;
+
+        setDefaultValues();
+        getPlayerImage();
+    }
+
+    public void setDefaultValues() {
+        worldX = gp.tileSize*3;
+        worldY = gp.tileSize*3;
+        speed = 4;
+        direction = "down";
+    }
+
+    public void getPlayerImage() {
+        try {
+            up1 = ImageIO.read(getClass().getResourceAsStream("/player/char_up_1.png"));
+            up2 = ImageIO.read(getClass().getResourceAsStream("/player/char_up_2.png"));
+            down1 = ImageIO.read(getClass().getResourceAsStream("/player/char_down_1.png"));
+            down2 = ImageIO.read(getClass().getResourceAsStream("/player/char_down_2.png"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/player/char_left_1.png"));
+            left2 = ImageIO.read(getClass().getResourceAsStream("/player/char_left_2.png"));
+            right1 = ImageIO.read(getClass().getResourceAsStream("/player/char_right_1.png"));
+            right2 = ImageIO.read(getClass().getResourceAsStream("/player/char_right_2.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void update() {
+        if (!moving) {
+            if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
+                if (keyH.upPressed) {
+                    direction = "up";
+                } else if (keyH.downPressed) {
+                    direction = "down";
+                } else if (keyH.leftPressed) {
+                    direction = "left";
+                } else if (keyH.rightPressed) {
+                    direction = "right";
+                }
+                moving = true;
+                
+                //Check Tile Collision
+                collisionOn = false;
+                gp.collisionChecker.checkTile(this);
+
+            }
+            else {
+                standCounter++;
+                if (standCounter == 20) {
+                    spriteNum = 1;
+                    standCounter = 0;
+                }
+            }
+        }
+        if (moving) {
+            //If collision false, player can move
+            if (collisionOn == false) {
+                switch(direction) {
+                    case "up":
+                        worldY -= speed;
+                    break;
+                    case "down":
+                        worldY += speed;
+                    break;
+                    case "left":
+                        worldX -= speed;
+                    break;
+                    case "right":
+                        worldX += speed;
+                    break;
+                }
+            }
+            
+            
+            spriteCounter++;
+            if (spriteCounter > 12) {
+                if (spriteNum == 1) {
+                    spriteNum = 2;
+                } else if (spriteNum == 2) {
+                    spriteNum = 1;
+                }
+                spriteCounter = 0;
+            }
+        }
+        pixelCounter += speed;
+        if (pixelCounter == 48) {
+            moving = false;
+            pixelCounter = 0;
+        }
+    }
+
+    public void draw(Graphics2D g2) {
+        // g2.setColor(Color.white);
+        // g2.fillRect(x, y, gp.tileSize, gp.tileSize);
+
+        BufferedImage image = null;
+
+        switch(direction) {
+        case "up":
+            if (spriteNum == 1) {
+                image = up1;
+            }
+            if (spriteNum == 2) {
+                image = up2;
+            }
+            break;
+        case "down":
+            if (spriteNum == 1) {
+                image = down1;
+            }
+            if (spriteNum == 2) {
+                image = down2;
+            }
+            break;
+        case "left":
+            if (spriteNum == 1) {
+                image = left1;
+            }
+            if (spriteNum == 2) {
+                image = left2;
+            }
+            break;
+        case "right":
+            if (spriteNum == 1) {
+                image = right1;
+            }
+            if (spriteNum == 2) {
+                image = right2;
+            }
+            break;
+        }
+
+        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
     }
 
     //Name
