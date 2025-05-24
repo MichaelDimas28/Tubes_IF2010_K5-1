@@ -9,6 +9,14 @@ public class ShippingBin {
         this.shippedItems = new ArrayList<>();
     }
 
+    public boolean addItem(Items item) {
+        if (isFull()) {
+            return false;
+        }
+        shippedItems.add(item);
+        return true;
+    }
+
     public int calculatePrice() {
         int total = 0;
         for (Items item : shippedItems) {
@@ -23,5 +31,9 @@ public class ShippingBin {
 
     public void clearShippingBin() {
         shippedItems.clear();
+    }
+
+    public List<Items> getShippedItems() {
+        return shippedItems;
     }
 }
