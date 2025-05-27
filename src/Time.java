@@ -24,9 +24,18 @@ public class Time {
         return minute;
     }
 
-    public synchronized void skipTime(int minutesToAdd) {
-        int newMinute = minute + minutesToAdd;
-        hour = (hour + newMinute / 60) % 24;
-        minute = newMinute % 60;
+    public synchronized void skipTime(int minutesToAdd, Farm farmInstance) { // Tambahkan farmInstance
+    this.minute += minutesToAdd;
+    while (this.minute >= 60) {
+        this.minute -= 60;
+        this.hour++;
+        if (this.hour >= 24) {
+            this.hour -= 24;
+            if (farmInstance != null) {
+                farmInstance.processNewDay(); // Langsung panggil metode di Farm saat hari berganti
+            }
+        }
     }
+}
+
 }
