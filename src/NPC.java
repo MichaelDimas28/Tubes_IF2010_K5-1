@@ -80,6 +80,9 @@ public class NPC {
         return listOfNPC;
     }
 
+    public RelationshipStatus getRelationshipStatus() {
+        return relationshipStatus;
+    }
 
 }
 
