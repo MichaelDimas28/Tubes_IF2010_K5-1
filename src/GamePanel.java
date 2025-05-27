@@ -17,8 +17,10 @@ public class GamePanel extends JPanel implements Runnable {
     // final int FPS = 60;
 
     // World Settings
-    public final int maxWorldCol = 32;
-    public final int maxWorldRow = 32;
+    public int maxWorldCol;
+    public int maxWorldRow;
+    public final int maxMap = 10; // Total jumlah map yang ada
+    public int currentMap = 0;
     public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
 

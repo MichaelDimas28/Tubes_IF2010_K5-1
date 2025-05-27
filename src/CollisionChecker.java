@@ -21,32 +21,32 @@ public class CollisionChecker {
         switch(player.direction) {
             case "up":
             playerTopRow = (playerTopWorldY-player.speed)/gp.tileSize;
-            tileNum1 = gp.tileM.mapTileNum[playerLeftCol][playerTopRow];
-            tileNum2 = gp.tileM.mapTileNum[playerRightCol][playerTopRow];
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][playerLeftCol][playerTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][playerRightCol][playerTopRow];
             if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
                 player.collisionOn = true;
             }
             break;
             case "down":
             playerBottomRow = (playerBottomWorldY+player.speed)/gp.tileSize;
-            tileNum1 = gp.tileM.mapTileNum[playerLeftCol][playerBottomRow];
-            tileNum2 = gp.tileM.mapTileNum[playerRightCol][playerBottomRow];
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][playerLeftCol][playerBottomRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][playerRightCol][playerBottomRow];
             if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
                 player.collisionOn = true;
             }
             break;
             case "left":
             playerLeftCol = (playerLeftWorldX-player.speed)/gp.tileSize;
-            tileNum1 = gp.tileM.mapTileNum[playerLeftCol][playerTopRow];
-            tileNum2 = gp.tileM.mapTileNum[playerLeftCol][playerBottomRow];
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][playerLeftCol][playerTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][playerLeftCol][playerBottomRow];
             if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
                 player.collisionOn = true;
             }
             break;
             case "right":
             playerRightCol = (playerLeftWorldX+player.speed)/gp.tileSize;
-            tileNum1 = gp.tileM.mapTileNum[playerRightCol][playerTopRow];
-            tileNum2 = gp.tileM.mapTileNum[playerRightCol][playerBottomRow];
+            tileNum1 = gp.tileM.mapTileNum[gp.currentMap][playerRightCol][playerTopRow];
+            tileNum2 = gp.tileM.mapTileNum[gp.currentMap][playerRightCol][playerBottomRow];
             if (gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision) {
                 player.collisionOn = true;
             }

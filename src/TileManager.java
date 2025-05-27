@@ -1,6 +1,6 @@
 import java.awt.Graphics2D;
 import java.io.BufferedReader;
-import java.io.IO;
+// import java.io.IO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,10 +11,10 @@ import javax.imageio.ImageIO;
 public class TileManager {
     GamePanel gp;
     public Tile[] tile;
-    public int mapTileNum[][];
+    public int mapTileNum[][][];
 
     ArrayList<String> fileNames = new ArrayList<>();
-    ArrayList<String> collissionStatus = new ArrayList<>();
+    ArrayList<String> collisionStatus = new ArrayList<>();
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
@@ -23,13 +23,14 @@ public class TileManager {
         InputStream is = getClass().getResourceAsStream("/maps/tiledata.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         
-        // untuk menyimpan data collission dari setiap tile dari tiledata.txt
+        // untuk menyimpan data collision dari setiap tile dari tiledata.txt
         String line;
         try {
             while ((line = br.readLine()) != null) {
                 fileNames.add(line);
-                collissionStatus.add(br.readLine());
+                collisionStatus.add(br.readLine());
             }
+            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,36 +56,38 @@ public class TileManager {
             System.out.println("Exception!");
         }
 
-        loadMap("/maps/map1/txt", 0);
+        loadMap("/maps/map1.txt", 0);
     }
 
     public void getTileImage() {
         for (int i=0 ; i < fileNames.size() ; i++) {
             String fileName;
-            boolean collission;
+            boolean collision;
 
             fileName = fileNames.get(i);
-            if (collissionStatus.get(i).equals("true")) {
-                collission = true;
+            if (collisionStatus.get(i).equals("true")) {
+                collision = true;
             } else {
-                collission = false;
+                collision = false;
             }
-            setup(i, fileName, collission);
+            setup(i, fileName, collision);
         }
     }
 
-    public void setup(int index, String imageName, boolean collission) {
-        UtilityTool uTool = new UtilityTool();
+    public void setup(int index, String imageName, boolean collision) {
+        // UtilityTool uTool = new UtilityTool();
 
         try {
             tile[index] = new Tile();
             tile[index].image = ImageIO.read(getClass().getResourceAsStream("/tiles/"+imageName));
-            tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
-            tile[index].collision = collission;
+            // tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
+            tile[index].collision = collision;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public void loadMap(String mapFile, int x) {
+    public void loadMap(String mapFile, int map) {
         try {
             InputStream is = getClass().getResourceAsStream(mapFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -98,15 +101,15 @@ public class TileManager {
                     String numbers[] = line.split(" ");
                     int num = Integer.parseInt(numbers[col]); //Convert String menjadi integer
 
-                    mapTileNum[col][row] = num;
+                    mapTileNum[map][col][row] = num;
                     col++;
                 }
                 if (col == gp.maxWorldCol) {
                     col = 0;
                     row++;
                 }
-                br.close();
             }
+            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -119,7 +122,7 @@ public class TileManager {
         // int y = 0;
 
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
-            int tileNum = mapTileNum[worldCol][worldRow];
+            int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
             int screenX = worldX - gp.player.worldX + gp.player.screenX;

@@ -69,8 +69,8 @@ public class Player implements Action {
     }
 
     public void setDefaultValues() {
-        worldX = gp.tileSize*3;
-        worldY = gp.tileSize*3;
+        worldX = gp.tileSize*8;
+        worldY = gp.tileSize*13;
         speed = 4;
         direction = "down";
     }
@@ -146,11 +146,11 @@ public class Player implements Action {
                 }
                 spriteCounter = 0;
             }
-        }
-        pixelCounter += speed;
-        if (pixelCounter == 48) {
-            moving = false;
-            pixelCounter = 0;
+            pixelCounter += speed;
+            if (pixelCounter == 48) {
+                moving = false;
+                pixelCounter = 0;
+            }
         }
     }
 
@@ -196,6 +196,8 @@ public class Player implements Action {
         }
 
         g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+        // g2.setColor((Color.red));
+        // g2.drawRect(screenX+solidArea.x, screenY+solidArea.y, solidArea.width, solidArea.height);
     }
 
     //Name
