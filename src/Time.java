@@ -36,6 +36,7 @@ public class Time {
             }
         }
     }
+}
 
     // Agar bisa menjadi nilai 0000-2400 (dalam format HHMM)
     public synchronized int getTimeAsInt() {
@@ -51,6 +52,4 @@ public class Time {
             return current >= startTime || current <= endTime;
         }
     }
-}
-
 }

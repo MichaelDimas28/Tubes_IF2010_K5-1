@@ -39,7 +39,7 @@ public class Map {
                 }
     
                 for (int colIdx = 0; colIdx < column ; colIdx++) {
-                    tiles[rowIdx][colIdx] = new Tile(mapTiles[colIdx].charAt(0));
+                    // tiles[rowIdx][colIdx] = new Tile(mapTiles[colIdx].charAt(0));
                 }
                 rowIdx++;
             }
