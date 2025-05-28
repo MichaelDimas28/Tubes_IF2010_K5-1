@@ -3,8 +3,8 @@ public class Seeds extends Items{
     private Season seasonGrow;
     private int daysToHarvest;
     
-    public Seeds(String itemName, int buyPrice, int sellPrice,Season seasonGrow, int daysToHarvest){
-        super(itemName, buyPrice, sellPrice);
+    public Seeds(String itemName, int buyPrice,Season seasonGrow, int daysToHarvest, String imageName){
+        super(itemName, buyPrice, imageName);
         this.seasonGrow = seasonGrow;
         this.daysToHarvest = daysToHarvest;
 

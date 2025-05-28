@@ -1,7 +1,20 @@
 import java.util.List;
-import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
+
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class NPC {
+    GamePanel gp;
+    public int worldX, worldY;
+    public int speed;
+    public BufferedImage idle;
+    public Rectangle solidArea = new Rectangle(0,0,48,48);
+    public int solidAreaDefaultX, solidAreaDefaultY;
+    public boolean collisionOn = false;
+
     private String name;
     private Gender gender;
     private int heartPoints;
@@ -14,7 +27,7 @@ public class NPC {
     private List<Items> likedItems;
     private List<Items> hatedItems;
     public static final int MAX_HEART_POINTS = 150;
-    private static List<NPC> listOfNPC = new ArrayList<>();
+    // private static List<NPC> listOfNPC = new ArrayList<>();
 
     public NPC(String name, Gender gender, int heartPoints, List<String> dialogues, RelationshipStatus relationshipStatus, int freqChat, int freqGift, int freqVisit, List<Items> lovedItems, List<Items> likedItems, List<Items> hatedItems) {
         this.name = name;
@@ -28,7 +41,25 @@ public class NPC {
         this.lovedItems = lovedItems;
         this.likedItems = likedItems;
         this.hatedItems = hatedItems;
-        listOfNPC.add(this);
+        // listOfNPC.add(this);
+    }
+
+    public void getNPCImage() {
+        idle = setup("abigail32.png", gp.tileSize, gp.tileSize);
+    }
+
+    public BufferedImage setup(String imageName, int width, int height) {
+        UtilityTool uTool = new UtilityTool();
+
+        BufferedImage image = null;
+
+        try {
+            image = ImageIO.read(getClass().getResourceAsStream("/npc/"+imageName));
+            image = uTool.scaleImage(image, width, height);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
     }
 
     public String getName() {
@@ -76,9 +107,9 @@ public class NPC {
         this.relationshipStatus = relationshipStatus;
     }
 
-    public static List<NPC> getListOfNPC() {
-        return listOfNPC;
-    }
+    // public static List<NPC> getListOfNPC() {
+    //     return listOfNPC;
+    // }
 
 
 }

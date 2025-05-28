@@ -11,7 +11,6 @@ import java.util.ArrayList;
 // import java.util.HashMap;
 
 public class Player implements Action {
-    public UI ui;
     public int worldX, worldY;
     public int speed;
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
@@ -38,11 +37,11 @@ public class Player implements Action {
     int fishingFrameCounter = 0;
 
 
-    public Equipment wateringCan = new Equipment("Watering Can", 0, 0);
-    public Equipment hoe = new Equipment("Hoe", 0, 0);
-    public Equipment fishingRod = new Equipment("Fishing Rod", 0, 0);
+    public Equipment wateringCan = new Equipment("Watering Can", "wateringcan.png");
+    public Equipment hoe = new Equipment("Hoe", "hoe.png");
+    public Equipment fishingRod = new Equipment("Fishing Rod", "fishingrod.png");
 
-
+    public UI ui;
     GamePanel gp;
     KeyHandler keyH;
 
@@ -380,10 +379,10 @@ public class Player implements Action {
             break;
         }
 
-        g2.drawImage(image, tempScreenX, tempScreenY, null);
         if (itemHeld!=null && (itemHeld.getItemName().equals("Hoe") || itemHeld.getItemName().equals("Fishing Rod") || itemHeld.getItemName().equals("Watering Can"))) {
             g2.drawImage(guidebox, guideboxX, guideboxY, gp.tileSize, gp.tileSize, null);
         }
+        g2.drawImage(image, tempScreenX, tempScreenY, null);
 
         // Untuk cek Hitbox Collision Karakter
         // g2.setColor((Color.red));
@@ -635,17 +634,17 @@ public class Player implements Action {
     }
 
     public void cook(Food food) {
-        if (!food.getRecipeAquiredStatus()) {
+        if (!food.isRecipeAcquired()) {
             System.out.println("Resep belum diperoleh.");
             return;
         }
 
-        String[] ingredients = food.getIngredients();
+        List<Items> ingredients = food.getIngredients();
         List<InventoryItem> itemsToConsume = new ArrayList<>();
         boolean hasAllIngredients = true;
 
         // Cek apakah semua bahan tersedia
-        for (String ingredient : ingredients) {
+        for (Items ingredient : ingredients) {
             boolean found = false;
             for (InventoryItem invItem : inventory.getItems()) {
                 if (invItem.getItem().getItemName().equals(ingredient) && invItem.getQuantity() >= 1) {

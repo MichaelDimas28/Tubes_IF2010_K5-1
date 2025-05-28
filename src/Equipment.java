@@ -1,5 +1,5 @@
 public class Equipment extends Items{
-    public Equipment(String itemName, int buyPrice, int sellPrice){
-        super(itemName, buyPrice, sellPrice);
+    public Equipment(String itemName, String imageName){
+        super(itemName, 0,0, imageName);
     }
 }
