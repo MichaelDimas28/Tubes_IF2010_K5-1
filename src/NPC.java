@@ -110,5 +110,13 @@ public class NPC {
     public void setDefaultSolidArea() {
         solidArea = new Rectangle(0, gp.tileSize, gp.tileSize, gp.tileSize); 
     }
+    // public static List<NPC> getListOfNPC() {
+    //     return listOfNPC;
+    // }
+
+    public RelationshipStatus getRelationshipStatus() {
+        return relationshipStatus;
+    }
+
 }
 
