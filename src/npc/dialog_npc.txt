@@ -1,0 +1,128 @@
+Mayor Tadi
+Perkenalan:
+"Oh, kamu warga baru ya? Saya Mayor Tadi. Tolong jangan bawa barang murahan ke rumah saya."
+
+Loved item:
+"Akhirnya, seseorang tahu bagaimana memperlakukan seorang wali kota."
+
+Liked item:
+"Hmm, lumayanlah. Tidak seburuk yang kubayangkan."
+
+Hated item:
+"Astaga! Barang seperti ini bahkan tidak pantas ada di karpet saya."
+
+Item netral:
+"Err... kamu yakin ini hadiah? Terlihat biasa banget."
+
+Random:
+"Kapan ya ada festival kemewahan? Rakyat pasti suka parade perhiasan."
+"Aku sedang mempertimbangkan untuk mengganti lantai balai kota dengan marmer. Demi estetika, tentu saja."
+"Kalau semua warga punya selera sepertiku, desa ini akan jadi pusat mode!"
+
+
+Caroline
+Perkenalan:
+"Hai! Aku Caroline, kalau kamu punya kayu bekas, bawa aja ke sini!"
+
+Loved item:
+"Wow! Ini pas banget buat proyek seni daur ulangku."
+
+Liked item:
+"Ah, makanan yang netral dan menenangkan. Aku suka!"
+
+Hated item:
+"Aduh! Lidahku terbakar cuma ngeliat ini..."
+
+Item netral:
+"Oh, makasih ya. Mungkin bisa disimpan dulu."
+
+Random:
+"Kadang barang paling sederhana justru punya cerita paling menarik."
+"Aku pernah bikin lampu dari sendok bekas. Lucu banget, lho!"
+"Kalau kamu punya benda unik, jangan buang dulu. Bisa aku sulap jadi dekorasi."
+
+Perry
+Perkenalan:
+"Hai... aku Perry. Maaf kalau aku terlihat canggung. Aku lebih sering ngobrol dengan karakter novelku."
+
+Loved item:
+"Wah, manisnya mengingatkanku pada bab romantis novelnya."
+
+Liked item:
+"Oh, cocok buat menemani waktu baca malamku. Terima kasih."
+
+Hated item:
+"Eh... maaf, aku kurang suka bau amis... ngusap hidung"
+
+Item netral:
+"Makasih. Mungkin bisa jadi inspirasi karakter baru?"
+
+Random:
+"Kau tahu? Kadang aku menulis tokoh berdasarkan orang sungguhan... tapi tenang saja, bukan kamu... mungkin."
+"Ide cerita sering datang dari tempat-tempat yang paling sepi… atau paling absurd."
+"Aku menulis 10 halaman tadi malam... lalu hapus semua pagi ini. Proses kreatif tuh emang chaos."
+
+Dasco
+Perkenalan:
+"Yo, nama gue Dasco. Kalau mau uji keberuntungan, datang ke kasinoku."
+
+Loved item:
+"Ini baru makanan elit! Kamu ngerti selera tinggi!"
+
+Liked item:
+"Boleh juga ini. Thanks ya!"
+
+Hated item:
+"Lo beneran ngasih gue beginian? Yang bener aje bro."
+
+Item netral:
+"Hm, yaudahlah. Niatnya bagus meski item-nya nggak banget."
+
+Random:
+"Gue pernah kalah taruhan sama ayam. Jangan tanya gimana caranya."
+"Hidup itu soal peluang. Tapi kadang, kamu cuma butuh sedikit gaya."
+"Kalah itu bukan gagal. Itu cuma... waktu untuk strategi ulang. Gitu sih kata brosurku."
+
+Emily
+Perkenalan:
+"Hai, aku Emily! Kalau kamu punya bahan segar, aku bisa masak sesuatu yang enak!"
+
+Loved item:
+"Bibit ini bakal jadi bahan segar buat restoranku. Terima kasih!"
+
+Liked item:
+"Wah, pas banget buat menu baru. Kamu tahu selera chef!"
+
+Hated item:
+"Eh, aku chef, bukan tukang las..."
+
+Item netral:
+"Oh, makasih! Mungkin suatu saat berguna."
+
+Random:
+"Setiap resep itu punya cerita. Kadang rasa enaknya datang dari kenangan."
+"Silakan lihat-lihat! Semua bahan segar langsung dari kebunku sendiri. Kamu ingin beli apa?"
+"Masakanku enak-enak loh."
+"Barangnya itu saja?"
+"Terima kasih sudah membeli! Sampai jumpa di lain waktu!"
+
+Abigail
+Perkenalan:
+"Yo! Aku Abigail. Kamu suka eksplorasi? Aku baru nemu gua kecil di balik hutan!"
+
+Loved item:
+"Ini dia bekal energi terbaik buat eksplorasi hari ini!"
+
+Liked item:
+"Wah enak banget, cocok buat makan sambil lihat bintang!"
+
+Hated item:
+"Kayaknya ini cuma akan nambah beban ransel aku..."
+
+Item netral:
+"Hmmm... oke, bisa disimpan di tas, siapa tahu berguna."
+
+Random:
+"Kadang aku pengen tinggal di rumah pohon dan hidup dari buah liar."
+"Aku nemu batu aneh di pinggir sungai... sepertinya punya aura mistis."
+"Kalau kamu denger suara aneh tengah malam, kemungkinan itu cuma aku latihan pedang kayu."
