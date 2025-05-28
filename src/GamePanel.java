@@ -29,6 +29,8 @@ public class GamePanel extends JPanel implements Runnable {
     Thread gameThread;
     public CollisionChecker collisionChecker = new CollisionChecker(this);
     public Player player = new Player("Test", Gender.Male, 100, 0, this, keyH);
+    public ItemManager itemManager = new ItemManager();
+    public NPCManager npcManager = new NPCManager(this);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -71,7 +73,9 @@ public class GamePanel extends JPanel implements Runnable {
 
         tileM.draw(g2);
 
+        
         player.draw(g2);
+        npcManager.draw(g2);
         g2.dispose();
     }
 }

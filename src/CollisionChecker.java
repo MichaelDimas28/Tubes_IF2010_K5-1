@@ -1,3 +1,5 @@
+import java.awt.Rectangle;
+
 public class CollisionChecker {
     GamePanel gp;
     
@@ -66,4 +68,44 @@ public class CollisionChecker {
             break;
         }
     }
+
+    public int checkNPC(Player player, NPC[] npcs) {
+        int index = -1;
+
+        Rectangle playerSolidArea = new Rectangle(
+            player.worldX + player.solidArea.x,
+            player.worldY + player.solidArea.y,
+            player.solidArea.width,
+            player.solidArea.height
+        );
+
+        // Prediksi arah gerakan
+        switch (player.direction) {
+            case "up":    playerSolidArea.y -= player.speed; break;
+            case "down":  playerSolidArea.y += player.speed; break;
+            case "left":  playerSolidArea.x -= player.speed; break;
+            case "right": playerSolidArea.x += player.speed; break;
+        }
+
+        for (int i = 0; i < npcs.length; i++) {
+            NPC npc = npcs[i];
+            if (npc != null) {
+                Rectangle npcArea = new Rectangle(
+                    npc.worldX + npc.solidArea.x,
+                    npc.worldY + npc.solidArea.y,
+                    npc.solidArea.width,
+                    npc.solidArea.height
+                );
+
+                if (playerSolidArea.intersects(npcArea)) {
+                    player.collisionOn = true;
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        return index;
+    }
+
 }

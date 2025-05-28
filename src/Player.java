@@ -214,6 +214,8 @@ public class Player implements Action {
                 //Check Tile Collision
                 collisionOn = false;
                 gp.collisionChecker.checkTile(this);
+                gp.collisionChecker.checkNPC(this, gp.npcManager.npcs);
+
 
             } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing) {
                 tilling = true;

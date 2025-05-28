@@ -74,8 +74,8 @@ public class ItemManager {
         itemMap.put("Eggplant", new Crops("Eggplant", 200, 180, 1, "crop_fall.png"));
 
         // Food
-        Items anyFish = new Fish("Any Fish", null, null, null, null, Rarity.Common, "common_fish.png");
-        Items legendFish = new Fish("Legend Fish", null, null, null, null, Rarity.Legendary, "legendary_fish.png");
+        Items anyFish = new Fish("Any Fish", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Any"), Rarity.Common, "common_fish.png");
+        Items legendFish = new Fish("Legend Fish", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Any"), Rarity.Legendary, "legendary_fish.png");
         itemMap.put("Fish n' Chips", new Food("Fish n' Chips", 150, 135, 50,List.of(itemMap.get("Wheat"), itemMap.get("Potato"), anyFish, anyFish), "seafood.png", false));
         itemMap.put("Baguette", new Food("Baguette", 100, 80, 25, List.of(itemMap.get("Wheat"), itemMap.get("Wheat"), itemMap.get("Wheat")),"bread.png", true));
         itemMap.put("Sashimi", new Food("Sashimi", 300, 275, 70, List.of(itemMap.get("Salmon"), itemMap.get("Salmon"), itemMap.get("Salmon")),"seafood.png", false));

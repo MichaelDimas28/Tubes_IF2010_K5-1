@@ -11,7 +11,7 @@ public class NPC {
     public int worldX, worldY;
     public int speed;
     public BufferedImage idle;
-    public Rectangle solidArea = new Rectangle(0,0,48,48);
+    public Rectangle solidArea;
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
 
@@ -107,10 +107,8 @@ public class NPC {
         this.relationshipStatus = relationshipStatus;
     }
 
-    // public static List<NPC> getListOfNPC() {
-    //     return listOfNPC;
-    // }
-
-
+    public void setDefaultSolidArea() {
+        solidArea = new Rectangle(0, gp.tileSize, gp.tileSize, gp.tileSize); 
+    }
 }
 
