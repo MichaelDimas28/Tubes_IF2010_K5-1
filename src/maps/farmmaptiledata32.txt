@@ -93,7 +93,7 @@ true
 246.png
 true
 247.png
-true
+false
 248.png
 true
 249.png
@@ -110,7 +110,7 @@ true
 true
 255.png
 true
-256png
+256.png
 true
 257.png
 true

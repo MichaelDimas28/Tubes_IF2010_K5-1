@@ -11,14 +11,37 @@ import java.util.ArrayList;
 // import java.util.HashMap;
 
 public class Player implements Action {
+    public UI ui;
     public int worldX, worldY;
     public int speed;
     public BufferedImage up1, up2, down1, down2, left1, left2, right1, right2;
+    public BufferedImage hoeUp1, hoeUp2, hoeDown1, hoeDown2, hoeRight1, hoeRight2, hoeLeft1, hoeLeft2, waterUp1, waterUp2, waterDown1, waterDown2, waterLeft1, waterLeft2, waterRight1, waterRight2, rodUp1, rodUp2, rodDown1, rodDown2, rodLeft1, rodLeft2, rodRight1, rodRight2;
+    public BufferedImage guidebox;
     public String direction;
     public int spriteCounter = 0;
     public int spriteNum = 1;
     public Rectangle solidArea; //hitbox karakter player
     public boolean collisionOn = false;
+    public boolean tilling = false;
+    public boolean watering = false;
+    public boolean fishing = false;
+    public boolean canTill = true;
+    public int tillCooldownCounter = 0;
+    public final int tillCooldownMax = 30; // frame (30 = 0.5 detik kalau 60FPS)
+    public boolean canWater = true;
+    public int waterCooldownCounter = 0;
+    public final int waterCooldownMax = 30; // frame (30 = 0.5 detik kalau 60FPS)
+    public boolean canFish = true;
+    public int fishCooldownCounter = 0;
+    public final int fishCooldownMax = 30; // frame (30 = 0.5 detik kalau 60FPS)
+    int fishingPhase = 0; // 0 = belum dimulai, 1 = rod_1, 2 = rod_2
+    int fishingFrameCounter = 0;
+
+
+    public Equipment wateringCan = new Equipment("Watering Can", 0, 0);
+    public Equipment hoe = new Equipment("Hoe", 0, 0);
+    public Equipment fishingRod = new Equipment("Fishing Rod", 0, 0);
+
 
     GamePanel gp;
     KeyHandler keyH;
@@ -64,34 +87,119 @@ public class Player implements Action {
         solidArea.width = 46;
         solidArea.height = 46;
 
-        setDefaultValues();
+        setDefaultValues(gp.tileSize*14, gp.tileSize*14, "down");
         getPlayerImage();
+        getPlayerHoeImage();
+        getPlayerWaterImage();
+        getPlayerFishingImage();
     }
 
-    public void setDefaultValues() {
-        worldX = gp.tileSize*8;
-        worldY = gp.tileSize*13;
+    public void setDefaultValues(int worldX, int worldY, String direction) {
+        this.worldX = worldX;
+        this.worldY = worldY;
         speed = 4;
-        direction = "down";
+        this.direction = direction;
     }
 
     public void getPlayerImage() {
+        up1 = setup("char_up_1.png", gp.tileSize, gp.tileSize);
+        up2 = setup("char_up_2.png", gp.tileSize, gp.tileSize);
+        down1 = setup("char_down_1.png", gp.tileSize, gp.tileSize);
+        down2 = setup("char_down_2.png", gp.tileSize, gp.tileSize);
+        left1 = setup("char_left_1.png", gp.tileSize, gp.tileSize);
+        left2 = setup("char_left_2.png", gp.tileSize, gp.tileSize);
+        right1 = setup("char_right_1.png", gp.tileSize, gp.tileSize);
+        right2 = setup("char_right_2.png", gp.tileSize, gp.tileSize);
         try {
-            up1 = ImageIO.read(getClass().getResourceAsStream("/player/char_up_1.png"));
-            up2 = ImageIO.read(getClass().getResourceAsStream("/player/char_up_2.png"));
-            down1 = ImageIO.read(getClass().getResourceAsStream("/player/char_down_1.png"));
-            down2 = ImageIO.read(getClass().getResourceAsStream("/player/char_down_2.png"));
-            left1 = ImageIO.read(getClass().getResourceAsStream("/player/char_left_1.png"));
-            left2 = ImageIO.read(getClass().getResourceAsStream("/player/char_left_2.png"));
-            right1 = ImageIO.read(getClass().getResourceAsStream("/player/char_right_1.png"));
-            right2 = ImageIO.read(getClass().getResourceAsStream("/player/char_right_2.png"));
+            guidebox = ImageIO.read(getClass().getResourceAsStream("/objects/guidebox.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+    
+    public void getPlayerHoeImage() {
+        hoeUp1 = setup("char_hoe_up_1.png", gp.tileSize*2, gp.tileSize*2);
+        hoeUp2 = setup("char_hoe_up_2.png", gp.tileSize, gp.tileSize*2);
+        hoeDown1 = setup("char_hoe_down_1.png", gp.tileSize, gp.tileSize*2);
+        hoeDown2 = setup("char_hoe_down_2.png", gp.tileSize, gp.tileSize*3);
+        hoeLeft1 = setup("char_hoe_left_1.png", gp.tileSize, gp.tileSize*2);
+        hoeLeft2 = setup("char_hoe_left_2.png", gp.tileSize*2, gp.tileSize*2);
+        hoeRight1 = setup("char_hoe_right_1.png", gp.tileSize, gp.tileSize*2);
+        hoeRight2 = setup("char_hoe_right_2.png", gp.tileSize*2, gp.tileSize*2);
+    }
+    
+    public void getPlayerFishingImage() {
+        rodUp1 = setup("char_rod_up_1.png", gp.tileSize*2, gp.tileSize*2);
+        rodUp2 = setup("char_rod_up_2.png", gp.tileSize, gp.tileSize*2);
+        rodDown1 = setup("char_rod_down_1.png", gp.tileSize, gp.tileSize*2);
+        rodDown2 = setup("char_rod_down_2.png", gp.tileSize, gp.tileSize*2);
+        rodLeft1 = setup("char_rod_left_1.png", gp.tileSize, gp.tileSize*2);
+        rodLeft2 = setup("char_rod_left_2.png", gp.tileSize*2, gp.tileSize*2);
+        rodRight1 = setup("char_rod_right_1.png", gp.tileSize, gp.tileSize*2);
+        rodRight2 = setup("char_rod_right_2.png", gp.tileSize*2, gp.tileSize*2);
+    }
+    
+    public void getPlayerWaterImage() {
+        waterUp1 = setup("char_watering_up_1.png", gp.tileSize, gp.tileSize*2);
+        waterUp2 = setup("char_watering_up_2.png", gp.tileSize, gp.tileSize*2);
+        waterDown1 = setup("char_watering_down_1.png", gp.tileSize, gp.tileSize*2);
+        waterDown2 = setup("char_watering_down_2.png", gp.tileSize, gp.tileSize*2);
+        waterLeft1 = setup("char_watering_left_1.png", gp.tileSize*2, gp.tileSize);
+        waterLeft2 = setup("char_watering_left_2.png", gp.tileSize*2, gp.tileSize);
+        waterRight1 = setup("char_watering_right_1.png", gp.tileSize*2, gp.tileSize);
+        waterRight2 = setup("char_watering_right_2.png", gp.tileSize*2, gp.tileSize);
+    }
+
+    public BufferedImage setup(String imageName, int width, int height) {
+        UtilityTool uTool = new UtilityTool();
+
+        BufferedImage image = null;
+
+        try {
+            image = ImageIO.read(getClass().getResourceAsStream("/player/"+imageName));
+            image = uTool.scaleImage(image, width, height);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
     }
 
     public void update() {
-        if (!moving) {
+        if (tilling) {
+            tilling();
+        }
+        if (!canTill) {
+            tillCooldownCounter++;
+            if (tillCooldownCounter > tillCooldownMax) {
+                canTill = true;
+                tillCooldownCounter = 0;
+            }
+        }
+
+        if (watering) {
+            watering();
+        }
+        if (!canWater) {
+            waterCooldownCounter++;
+            if (waterCooldownCounter > waterCooldownMax) {
+                canWater = true;
+                waterCooldownCounter = 0;
+            }
+        }
+
+        if (fishing) {
+            fishing();
+        }
+        if (!canFish) {
+            fishCooldownCounter++;
+            if (fishCooldownCounter > fishCooldownMax) {
+                canFish = true;
+                fishCooldownCounter = 0;
+            }
+        }
+
+        if (!moving && !tilling && !watering && !fishing) {
             if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
                 if (keyH.upPressed) {
                     direction = "up";
@@ -108,6 +216,19 @@ public class Player implements Action {
                 collisionOn = false;
                 gp.collisionChecker.checkTile(this);
 
+            } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing) {
+                tilling = true;
+                canTill = false;
+                keyH.enterPressed = false;
+            } else if (itemHeld != null && keyH.enterPressed && canWater && itemHeld.getItemName().equals("Watering Can") && !tilling && !fishing) {
+                watering = true;
+                canWater = false;
+                keyH.enterPressed = false;
+            } else if (itemHeld != null && keyH.enterPressed && canFish && itemHeld.getItemName().equals("Fishing Rod") && !tilling && !watering) {
+                fishing = true;
+                fishingPhase = 1; // Mulai animasi dari rod_1 dulu
+                canFish = false;
+                keyH.enterPressed = false;
             }
             else {
                 standCounter++;
@@ -117,7 +238,7 @@ public class Player implements Action {
                 }
             }
         }
-        if (moving) {
+        if (moving && !tilling && !watering && !fishing) {
             //If collision false, player can move
             if (collisionOn == false) {
                 switch(direction) {
@@ -139,11 +260,7 @@ public class Player implements Action {
             
             spriteCounter++;
             if (spriteCounter > 12) {
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
-                }
+                spriteNum = (spriteNum == 1) ? 2 : 1;
                 spriteCounter = 0;
             }
             pixelCounter += speed;
@@ -155,50 +272,190 @@ public class Player implements Action {
     }
 
     public void draw(Graphics2D g2) {
-        // g2.setColor(Color.white);
-        // g2.fillRect(x, y, gp.tileSize, gp.tileSize);
-
         BufferedImage image = null;
+        int tempScreenX = screenX;
+        int tempScreenY = screenY;
+        int guideboxX = screenX;
+        int guideboxY = screenY;
 
         switch(direction) {
         case "up":
-            if (spriteNum == 1) {
-                image = up1;
+            guideboxY -= gp.tileSize;
+            if (!tilling && !watering) {
+                if (spriteNum == 1) {image = up1;}
+                if (spriteNum == 2) {image = up2;}
             }
-            if (spriteNum == 2) {
-                image = up2;
+            if (tilling) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = hoeUp1;}
+                if (spriteNum == 2) {image = hoeUp2;}
             }
-            break;
-        case "down":
-            if (spriteNum == 1) {
-                image = down1;
+            if (watering) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = waterUp1;}
+                if (spriteNum == 2) {image = waterUp2;}
             }
-            if (spriteNum == 2) {
-                image = down2;
-            }
-            break;
-        case "left":
-            if (spriteNum == 1) {
-                image = left1;
-            }
-            if (spriteNum == 2) {
-                image = left2;
+            if (fishing) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = rodUp1;}
+                else if (spriteNum == 2) {image = rodUp2;}
             }
             break;
-        case "right":
-            if (spriteNum == 1) {
-                image = right1;
+            case "down":
+            guideboxY += gp.tileSize;
+            if (!tilling && !watering) {
+                if (spriteNum == 1) {image = down1;}
+                if (spriteNum == 2) {image = down2;}
             }
-            if (spriteNum == 2) {
-                image = right2;
+            if (tilling) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = hoeDown1;}
+                if (spriteNum == 2) {image = hoeDown2;}
+            }
+            if (watering) {
+                // tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = waterDown1;}
+                if (spriteNum == 2) {image = waterDown2;}
+            }
+            if (fishing) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = rodDown1;}
+                else if (spriteNum == 2) {image = rodDown2;}
+            }
+            break;
+            case "left":
+            guideboxX -= gp.tileSize;
+            if (!tilling && !watering) {
+                if (spriteNum == 1) {image = left1;}
+                if (spriteNum == 2) {image = left2;}
+            }
+            if (tilling) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = hoeLeft1;}
+                if (spriteNum == 2) {
+                    tempScreenX = screenX - gp.tileSize;
+                    image = hoeLeft2;
+                }
+            }
+            if (watering) {
+                // tempScreenY = screenY - gp.tileSize;
+                tempScreenX = screenX - gp.tileSize;
+                if (spriteNum == 1) {image = waterLeft1;}
+                if (spriteNum == 2) {image = waterLeft2;}
+            }
+            if (fishing) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = rodLeft1;}
+                else if (spriteNum == 2) {
+                    tempScreenX = screenX - gp.tileSize;
+                    image = rodLeft2;
+                }
+            }
+            break;
+            case "right":
+            guideboxX += gp.tileSize;
+            if (!tilling && !watering) {
+                if (spriteNum == 1) {image = right1;}
+                if (spriteNum == 2) {image = right2;}
+            }
+            if (tilling) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = hoeRight1;}
+                if (spriteNum == 2) {
+                    image = hoeRight2;
+                }
+            }
+            if (watering) {
+                // tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = waterRight1;}
+                if (spriteNum == 2) {image = waterRight2;}
+            }
+            if (fishing) {
+                tempScreenY = screenY - gp.tileSize;
+                if (spriteNum == 1) {image = rodRight1;}
+                else if (spriteNum == 2) {
+                    image = rodRight2;
+                }
             }
             break;
         }
 
-        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, tempScreenX, tempScreenY, null);
+        if (itemHeld!=null && (itemHeld.getItemName().equals("Hoe") || itemHeld.getItemName().equals("Fishing Rod") || itemHeld.getItemName().equals("Watering Can"))) {
+            g2.drawImage(guidebox, guideboxX, guideboxY, gp.tileSize, gp.tileSize, null);
+        }
+
+        // Untuk cek Hitbox Collision Karakter
         // g2.setColor((Color.red));
         // g2.drawRect(screenX+solidArea.x, screenY+solidArea.y, solidArea.width, solidArea.height);
     }
+
+    public void tilling() {
+        int tillingSpeed = 15;
+        spriteCounter++;
+        if (spriteCounter <= tillingSpeed) {
+            spriteNum = 1;
+        } 
+        if (spriteCounter > tillingSpeed && spriteCounter <= tillingSpeed*2) {
+            spriteNum = 2;
+        }
+        if (spriteCounter > tillingSpeed*2) {
+            spriteNum = 1;
+            spriteCounter = 0;
+            tilling = false;
+            canTill = false;
+            tillCooldownCounter = 0;
+        }
+    }
+
+    public void watering() {
+        int wateringSpeed = 15;
+        spriteCounter++;
+        if (spriteCounter <= wateringSpeed) {
+            spriteNum = 1;
+        } 
+        if (spriteCounter > wateringSpeed && spriteCounter <= wateringSpeed*2) {
+            spriteNum = 2;
+        }
+        if (spriteCounter > wateringSpeed*2) {
+            spriteNum = 1;
+            spriteCounter = 0;
+            watering = false;
+            canWater = false;
+            waterCooldownCounter = 0;
+        }
+    }
+
+    public void fishing() {
+        // Phase 1: Tampilkan rod_1 untuk beberapa frame
+        if (fishingPhase == 1) {
+            fishingFrameCounter++;
+            spriteNum = 1;
+
+            if (fishingFrameCounter > 15) { // Durasi 15 frame (~0.25 detik @60FPS)
+                fishingPhase = 2; // Ganti ke pose statis rod_2
+                fishingFrameCounter = 0;
+            }
+        }
+
+        // Phase 2: Tetap pada sprite rod_2
+        else if (fishingPhase == 2) {
+            spriteNum = 2;
+
+            // Tekan Enter lagi untuk membatalkan fishing
+            if (keyH.enterPressed) {
+                fishing = false;
+                canFish = false;
+                fishCooldownCounter = 0;
+                fishingPhase = 0;
+                spriteNum = 1;
+                keyH.enterPressed = false;
+            }
+        }
+    }
+
+
+
 
     //Name
     public String getName(){

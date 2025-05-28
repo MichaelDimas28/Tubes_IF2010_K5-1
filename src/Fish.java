@@ -15,7 +15,7 @@ public class Fish extends Items implements Edible {
         String weatherAppear, 
         String[] locationAppear, 
         String rarity,
-        int energi){
+        int energi) {
         super(itemName, buyPrice, sellPrice);
         this.seasonAppear = seasonAppear;
         this.timeAppear = timeAppear;

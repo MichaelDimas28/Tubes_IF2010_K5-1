@@ -7,20 +7,23 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
-
-public class TileManager {
-    GamePanel gp;
-    public Tile[] tile;
-    public int mapTileNum[][][];
-
-    ArrayList<String> fileNames = new ArrayList<>();
+import java.util.HashMap;
+import java.util.Map;
+    
+    public class TileManager {
+        GamePanel gp;
+        public Tile[] tile;
+        public int mapTileNum[][][];
+        public Map<Integer, Tile> tileMap = new HashMap<>();
+        
+        ArrayList<String> fileNames = new ArrayList<>();
     ArrayList<String> collisionStatus = new ArrayList<>();
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
 
         // untuk membaca tiledata.txt
-        InputStream is = getClass().getResourceAsStream("/maps/tiledata.txt");
+        InputStream is = getClass().getResourceAsStream("/maps/farmmaptiledata32.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         
         // untuk menyimpan data collision dari setiap tile dari tiledata.txt
@@ -40,7 +43,7 @@ public class TileManager {
         getTileImage();
 
         //mendapatkan row dan col map
-        is = getClass().getResourceAsStream("/maps/map1.txt");
+        is = getClass().getResourceAsStream("/maps/farmmapextend.txt");
         br = new BufferedReader(new InputStreamReader(is));
 
         try {
@@ -56,36 +59,62 @@ public class TileManager {
             System.out.println("Exception!");
         }
 
-        loadMap("/maps/map1.txt", 0);
+        loadMap("/maps/farmmapextend.txt", 0);
     }
+
+    // public void getTileImage() {
+    //     for (int i=0 ; i < fileNames.size() ; i++) {
+    //         String fileName;
+    //         boolean collision;
+
+    //         fileName = fileNames.get(i);
+    //         if (collisionStatus.get(i).equals("true")) {
+    //             collision = true;
+    //         } else {
+    //             collision = false;
+    //         }
+    //         setup(i, fileName, collision);
+    //     }
+    // }
 
     public void getTileImage() {
-        for (int i=0 ; i < fileNames.size() ; i++) {
-            String fileName;
-            boolean collision;
+    for (int i = 0; i < fileNames.size(); i++) {
+        String fileName = fileNames.get(i);
+        boolean collision = collisionStatus.get(i).equals("true");
 
-            fileName = fileNames.get(i);
-            if (collisionStatus.get(i).equals("true")) {
-                collision = true;
-            } else {
-                collision = false;
-            }
-            setup(i, fileName, collision);
-        }
+        // Ambil angka tile ID dari nama file, misal: 200.png → 200
+        int tileId = Integer.parseInt(fileName.replace(".png", ""));
+        setup(tileId, fileName, collision);
     }
+}
 
+
+    // public void setup(int index, String imageName, boolean collision) {
+    //     // UtilityTool uTool = new UtilityTool();
+
+    //     try {
+    //         tile[index] = new Tile();
+    //         tile[index].image = ImageIO.read(getClass().getResourceAsStream("/tiles/"+imageName));
+    //         // tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
+    //         tile[index].collision = collision;
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
     public void setup(int index, String imageName, boolean collision) {
-        // UtilityTool uTool = new UtilityTool();
-
-        try {
-            tile[index] = new Tile();
-            tile[index].image = ImageIO.read(getClass().getResourceAsStream("/tiles/"+imageName));
-            // tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
-            tile[index].collision = collision;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        UtilityTool uTool = new UtilityTool();
+    try {
+        Tile newTile = new Tile();
+        newTile.image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName));
+        newTile.image = uTool.scaleImage(newTile.image, gp.tileSize, gp.tileSize);
+        newTile.collision = collision;
+        tileMap.put(index, newTile);  // pakai HashMap
+    } catch (IOException e) {
+        System.out.println("Gagal load tile: " + imageName);
+        e.printStackTrace();
     }
+}
+
 
     public void loadMap(String mapFile, int map) {
         try {
@@ -120,17 +149,24 @@ public class TileManager {
         int worldRow = 0;
         // int x = 0;
         // int y = 0;
+        
 
         while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
             int tileNum = mapTileNum[gp.currentMap][worldCol][worldRow];
+            Tile t = tileMap.get(tileNum);
+
+            
             int worldX = worldCol * gp.tileSize;
             int worldY = worldRow * gp.tileSize;
             int screenX = worldX - gp.player.worldX + gp.player.screenX;
             int screenY = worldY - gp.player.worldY + gp.player.screenY;
-
-            if (worldX+gp.tileSize > gp.player.worldX - gp.player.screenX && worldX-gp.tileSize < gp.player.worldX + gp.player.screenX && worldY+gp.tileSize > gp.player.worldY - gp.player.screenY && worldY-gp.tileSize < gp.player.worldY + gp.player.screenY) {
-                g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            
+            if (t != null) {
+                g2.drawImage(t.image, screenX, screenY, null);
             }
+            // if (worldX+gp.tileSize > gp.player.worldX - gp.player.screenX && worldX-gp.tileSize < gp.player.worldX + gp.player.screenX && worldY+gp.tileSize > gp.player.worldY - gp.player.screenY && worldY-gp.tileSize < gp.player.worldY + gp.player.screenY) {
+            //     g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+            // }
             worldCol++;
             // x+= gp.tileSize;
             if (worldCol == gp.maxWorldCol) {
