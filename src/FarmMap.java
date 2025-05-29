@@ -2,7 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-public class FarmMap extends Map {
+public class FarmMap extends Maps {
     public FarmMap(String filePath) throws IOException {
         super("Farm", 32, 32, filePath);
     }

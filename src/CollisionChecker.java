@@ -1,4 +1,5 @@
 import java.awt.Rectangle;
+import java.util.List;
 
 public class CollisionChecker {
     GamePanel gp;
@@ -69,7 +70,7 @@ public class CollisionChecker {
         }
     }
 
-    public int checkNPC(Player player, NPC[] npcs) {
+    public int checkNPC(Player player, List<NPC> npcs) {
         int index = -1;
 
         Rectangle playerSolidArea = new Rectangle(
@@ -87,8 +88,8 @@ public class CollisionChecker {
             case "right": playerSolidArea.x += player.speed; break;
         }
 
-        for (int i = 0; i < npcs.length; i++) {
-            NPC npc = npcs[i];
+        for (int i = 0; i < npcs.size(); i++) {
+            NPC npc = npcs.get(i);
             if (npc != null) {
                 Rectangle npcArea = new Rectangle(
                     npc.worldX + npc.solidArea.x,

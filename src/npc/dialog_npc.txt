@@ -41,8 +41,9 @@ Emily
 "Eh, aku chef, bukan tukang las..."
 "Oh, makasih! Mungkin suatu saat berguna."
 "Setiap resep itu punya cerita. Kadang rasa enaknya datang dari kenangan."
-"Silakan lihat-lihat! Semua bahan segar langsung dari kebunku sendiri. Kamu ingin beli apa?"
 "Masakanku enak-enak loh."
+"Kamu tahu gak? Setiap bunga memiliki artinya masing-masing loh!"
+"Silakan lihat-lihat! Semua bahan segar langsung dari kebunku sendiri. Kamu ingin beli apa?"
 "Barangnya itu saja?"
 "Terima kasih sudah membeli! Sampai jumpa di lain waktu!"
 Abigail

@@ -10,12 +10,18 @@ import java.util.List;
 public class NPCManager {
     GamePanel gp;
     public NPC[] npcs;
+    public List<NPC>[] npcMapList;
     private Map<String, List<String>> npcDialogues = new HashMap<>();
     ItemManager items;
 
+    @SuppressWarnings("unchecked")
     public NPCManager(GamePanel gp) {
         this.gp = gp;
         npcs = new NPC[6]; // jumlah NPC statis
+        npcMapList = new ArrayList[gp.maxMap];
+        for (int i = 0; i < gp.maxMap ; i++) {
+            npcMapList[i] = new ArrayList<>();
+        }
         setNPCs();
         loadNPCDialogues();
     }
@@ -77,9 +83,11 @@ public void loadNPCDialogues() {
             mayorLoved, mayorLiked, mayorHated);
         mayorTadi.gp = gp;
         mayorTadi.idle = mayorTadi.setup("mayortadi32.png", gp.tileSize, gp.tileSize);
-        mayorTadi.worldX = gp.tileSize * 15;
-        mayorTadi.worldY = gp.tileSize * 15;
+        mayorTadi.worldX = gp.tileSize * 5;
+        mayorTadi.worldY = gp.tileSize * 4;
         npcs[0] = mayorTadi;
+        mayorTadi.setMapIndex(1);
+        npcMapList[1].add(mayorTadi);
         mayorTadi.setDefaultSolidArea();
 
         // Caroline
@@ -98,9 +106,11 @@ public void loadNPCDialogues() {
             caroLoved, caroLiked, caroHated);
         caroline.gp = gp;
         caroline.idle = caroline.setup("caroline32.png", gp.tileSize, gp.tileSize);
-        caroline.worldX = gp.tileSize * 16;
-        caroline.worldY = gp.tileSize * 15;
+        caroline.worldX = gp.tileSize * 4;
+        caroline.worldY = gp.tileSize * 3;
         npcs[1] = caroline;
+        caroline.setMapIndex(2);
+        npcMapList[2].add(caroline);
         caroline.setDefaultSolidArea();
         
         // Perry
@@ -123,9 +133,11 @@ public void loadNPCDialogues() {
             perryLoved, perryLiked, perryHated);
         perry.gp = gp;
         perry.idle = perry.setup("perry32.png", gp.tileSize, gp.tileSize);
-        perry.worldX = gp.tileSize * 17;
-        perry.worldY = gp.tileSize * 15;
+        perry.worldX = gp.tileSize *11;
+        perry.worldY = gp.tileSize * 2;
         npcs[2] = perry;
+        perry.setMapIndex(3);
+        npcMapList[3].add(perry);
         perry.setDefaultSolidArea();
 
         // Dasco
@@ -156,10 +168,12 @@ public void loadNPCDialogues() {
             dascoLoved, dascoLiked, dascoHated);
         dasco.gp = gp;
         dasco.idle = dasco.setup("dasco32.png", gp.tileSize, gp.tileSize);
-        dasco.worldX = gp.tileSize * 18;
-        dasco.worldY = gp.tileSize * 15;
+        dasco.worldX = gp.tileSize * 5;
+        dasco.worldY = gp.tileSize * 1;
         npcs[3] = dasco;
         dasco.setDefaultSolidArea();
+        dasco.setMapIndex(4);
+        npcMapList[4].add(dasco);
 
         // Emily
         List<Items> emilyLoved = new ArrayList<>();
@@ -183,9 +197,11 @@ public void loadNPCDialogues() {
             emilyLoved, emilyLiked, emilyHated);
         emily.gp = gp;
         emily.idle = emily.setup("emily32.png", gp.tileSize, gp.tileSize);
-        emily.worldX = gp.tileSize * 19;
-        emily.worldY = gp.tileSize * 15;
+        emily.worldX = gp.tileSize * 6;
+        emily.worldY = gp.tileSize * 6;
         npcs[4] = emily;
+        emily.setMapIndex(6);
+        npcMapList[6].add(emily);
         emily.setDefaultSolidArea();
 
         // Abigail
@@ -213,15 +229,18 @@ public void loadNPCDialogues() {
             abigailLoved, abigailLiked, abigailHated);
         abigail.gp = gp;
         abigail.idle = abigail.setup("abigail32.png", gp.tileSize, gp.tileSize);
-        abigail.worldX = gp.tileSize * 20;
-        abigail.worldY = gp.tileSize * 15;
+        abigail.worldX = gp.tileSize * 3;
+        abigail.worldY = gp.tileSize * 3;
         npcs[5] = abigail;
+        abigail.setMapIndex(5);
+        npcMapList[5].add(abigail);
         abigail.setDefaultSolidArea();
     }
     
     
     public void draw(Graphics2D g2) {
-        for (NPC npc : npcs) {
+        List<NPC> currentMapNPCs = npcMapList[gp.currentMap];
+        for (NPC npc : currentMapNPCs) {
             if (npc != null) {
                 int screenX = npc.worldX - gp.player.worldX + gp.player.screenX;
                 int screenY = npc.worldY - gp.player.worldY + gp.player.screenY;

@@ -1,36 +1,35 @@
 import java.util.Random;
 
 public class Farm {
-    private String farmName;
-    private Season season;
-    private Weather weather;
+    // private String farmName;
     private int day = 1;
-    private Time time;
-    private Player farmer;
-    private FarmMap farm;
-    private ShippingBin shippingBin;
+    private Season season = Season.Spring;
+    private Weather weather = Weather.Sunny;
+    private Time time = new Time(6, 0);
+    // private Player farmer;
+    // private FarmMap farm;
+    // private ShippingBin shippingBin;
     private Random randomGenerator = new Random();
     private int rainyDaysThisSeason = 0;
     private Weather weatherForTomorrow; 
 
-    Farm (String name, Weather weather, int day, Season season, Player farmer, FarmMap farmMap, Time time, ShippingBin shippingBin) {
-        this.farmName = name;
+    Farm (Weather weather, int day, Season season, Time time) {
         this.weather = weather;
         this.day = day;
         this.season = season;
-        this.farmer = farmer;
-        this.farm = farmMap;
+        // this.farmer = farmer;
+        // this.farm = farmMap;
         this.time = time;
-        this.shippingBin = shippingBin;
+        // this.shippingBin = shippingBin;
         if (this.weather == Weather.Rainy) { // Hitung hari hujan awal jika dimulai dengan hujan
             this.rainyDaysThisSeason = 1;
         }
         determineWeatherForTomorrow(); 
     }
 
-    public void setFarmName(String newName) {
-        this.farmName = newName;
-    }
+    // public void setFarmName(String newName) {
+    //     this.farmName = newName;
+    // }
 
     public void nextDay() {
         day++;
@@ -55,12 +54,12 @@ public class Farm {
     public Season getSeason() {
         return season;
     }
-    public ShippingBin getShippingBin() {
-        return shippingBin;
-    }
-    public String getFarmName() {
-        return farmName;
-    }
+    // public ShippingBin getShippingBin() {
+    //     return shippingBin;
+    // }
+    // public String getFarmName() {
+    //     return farmName;
+    // }
     public Time getTime() {
         return time;
     }

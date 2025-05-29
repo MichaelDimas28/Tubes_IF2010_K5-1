@@ -14,6 +14,8 @@ import java.util.Map;
         GamePanel gp;
         public Tile[] tile;
         public int mapTileNum[][][];
+        public int[] mapCols;
+        public int[] mapRows;
         public Map<Integer, Tile> tileMap = new HashMap<>();
         
         ArrayList<String> fileNames = new ArrayList<>();
@@ -58,13 +60,26 @@ import java.util.Map;
         } catch (IOException e) {
             System.out.println("Exception!");
         }
+        mapCols = new int[gp.maxMap];
+        mapRows = new int[gp.maxMap];
 
-        loadMap("/maps/farmmapextend.txt", 0);
+        loadMap("/maps/farmmapextend.txt", 0, 32, 32);
+        loadMap("/maps/npc_house.txt", 1, 16, 9);
+        loadMap("/maps/npc_house.txt", 2, 16, 9);
+        loadMap("/maps/npc_house.txt", 3, 16, 9);
+        loadMap("/maps/npc_house.txt", 4, 16, 9);
+        loadMap("/maps/npc_house.txt", 5, 16, 9);
+        loadMap("/maps/store.txt", 6, 18, 12);
+        loadMap("/maps/ocean.txt", 7, 5, 10);
+        loadMap("/maps/cutted_forest_map.txt", 8, 21, 21);
+        loadMap("/maps/cutted_mountain_map.txt", 9, 20, 20);
+        loadMap("/maps/WorldMap.txt", 10, 16, 8);
+        loadMap("/maps/npc_house.txt", 11, 16, 9); // House
     }
-
+    
     // public void getTileImage() {
-    //     for (int i=0 ; i < fileNames.size() ; i++) {
-    //         String fileName;
+        //     for (int i=0 ; i < fileNames.size() ; i++) {
+            //         String fileName;
     //         boolean collision;
 
     //         fileName = fileNames.get(i);
@@ -103,6 +118,13 @@ import java.util.Map;
     // }
     public void setup(int index, String imageName, boolean collision) {
         UtilityTool uTool = new UtilityTool();
+    // Untuk mengecek apakah ada Tiles yang ada pada tiledata namun tidak ada pada folder tiles
+    //     InputStream stream = getClass().getResourceAsStream("/tiles/" + imageName);
+    // if (stream == null) {
+    //     System.err.println("❌ Tile image missing: " + imageName);
+    //     return; // skip setup
+    // }
+
     try {
         Tile newTile = new Tile();
         newTile.image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName));
@@ -116,24 +138,26 @@ import java.util.Map;
 }
 
 
-    public void loadMap(String mapFile, int map) {
+    public void loadMap(String mapFile, int map, int colSize, int rowSize) {
+        mapCols[map] = colSize;
+        mapRows[map] = rowSize;
         try {
             InputStream is = getClass().getResourceAsStream(mapFile);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             int col = 0;
             int row = 0;
-            while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
+            while (col < colSize && row < rowSize) {
                 String line = br.readLine(); // baca satu baris dari txt
 
-                while (col < gp.maxWorldCol) {
+                while (col < colSize) {
                     String numbers[] = line.split(" ");
                     int num = Integer.parseInt(numbers[col]); //Convert String menjadi integer
 
                     mapTileNum[map][col][row] = num;
                     col++;
                 }
-                if (col == gp.maxWorldCol) {
+                if (col == colSize) {
                     col = 0;
                     row++;
                 }

@@ -14,6 +14,7 @@ public class NPC {
     public Rectangle solidArea;
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
+    public int mapIndex;
 
     private String name;
     private Gender gender;
@@ -87,8 +88,22 @@ public class NPC {
         } 
     }
 
+    public void setMapIndex(int mapIndex) {
+        this.mapIndex = mapIndex;
+    }
+
     public void chat() {
         // Implement chat logic here
+    }
+
+    public List<Items> getLovedItems() {
+        return lovedItems;
+    }
+    public List<Items> getLikedItems() {
+        return likedItems;
+    }
+    public List<Items> getHatedItems() {
+        return hatedItems;
     }
 
     public int getFreqChat() {
@@ -102,7 +117,18 @@ public class NPC {
     public int getFreqVisit() {
         return freqVisit;
     }
-
+    
+    public void setFreqChat(int freq) {
+        freqChat = freq;
+    }
+    
+    public void setFreqGift(int freq) {
+        freqGift = freq;
+    }
+    
+    public void setFreqVisit(int freq) {
+        freqVisit = freq;
+    }
     public void setRelationshipStatus(RelationshipStatus relationshipStatus) {
         this.relationshipStatus = relationshipStatus;
     }

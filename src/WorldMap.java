@@ -2,7 +2,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorldMap extends Map {
+public class WorldMap extends Maps {
     private String[] availableAction = {"move", "visit"};
     private List<String> actionNature = new ArrayList<>();
     private List<String> actionHouse = new ArrayList<>();

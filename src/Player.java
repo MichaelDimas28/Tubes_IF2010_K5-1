@@ -56,7 +56,7 @@ public class Player implements Action {
     private int energy = 100;
     private int gold;
     private Items itemHeld = null;
-    private Map currentMap = null;
+    private Maps currentMap = null;
     private int total_income = 0;
     private int total_expenditure = 0;
     private float avarage_season_income = 0;
@@ -86,7 +86,7 @@ public class Player implements Action {
         solidArea.width = 46;
         solidArea.height = 46;
 
-        setDefaultValues(gp.tileSize*14, gp.tileSize*14, "down");
+        setDefaultValues(gp.tileSize*14, gp.tileSize*15, "down");
         getPlayerImage();
         getPlayerHoeImage();
         getPlayerWaterImage();
@@ -214,9 +214,16 @@ public class Player implements Action {
                 //Check Tile Collision
                 collisionOn = false;
                 gp.collisionChecker.checkTile(this);
-                gp.collisionChecker.checkNPC(this, gp.npcManager.npcs);
+                gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
 
 
+            } else if (itemHeld != null && keyH.spacePressed && itemHeld!= null && !watering && !fishing && !tilling) {
+                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
+                if (npcIndex != 1) {
+                    NPC npc = gp.npcManager.npcs[npcIndex];
+                    interactWithNPC(npc);
+                }
+                keyH.spacePressed = false;
             } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing) {
                 tilling = true;
                 canTill = false;
@@ -268,6 +275,219 @@ public class Player implements Action {
             if (pixelCounter == 48) {
                 moving = false;
                 pixelCounter = 0;
+
+                checkMapTransition();
+            }
+        }
+    }
+
+    // Untuk berpindah dari map ke map
+    public void checkMapTransition() {
+        int col = worldX / gp.tileSize;
+        int row = worldY / gp.tileSize;
+
+        if (gp.currentMap == 0) { // Jika di Farm Maps
+            if (row == 0 || col == 0 || row == gp.maxWorldRow-1 || col == gp.maxWorldCol-1) {
+                gp.currentMap = 10;
+                setDefaultValues(7, 4, "up");
+                worldX = 8*gp.tileSize;
+                worldY = 4*gp.tileSize;
+            } 
+            if (row == 14 && col == 14) {
+                gp.currentMap = 11;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+        } else if (gp.currentMap == 10) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            
+            if (row == 5 && (col == 7 || col == 8 || col == 9)) {
+                gp.currentMap = 0;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(30, 1, "down");
+                worldX = 30*gp.tileSize;
+                worldY = 1*gp.tileSize;
+            }
+            if (row==2 && col ==7) {
+                gp.currentMap = 6;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(16, 10, "up");
+                worldX = 16*gp.tileSize;
+                worldY = 10*gp.tileSize;
+            }
+            if (row==2 && col == 5) {
+                gp.currentMap = 1;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+            if (row==6 && col == 5) {
+                gp.currentMap = 2;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+            if (row==6 && col == 11) {
+                gp.currentMap = 3;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+            if (row==2 && col == 11) {
+                gp.currentMap = 4;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+            if (row==2 && col == 9) {
+                gp.currentMap = 5;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 7, "up");
+                worldX = 7*gp.tileSize;
+                worldY = 7*gp.tileSize;
+            }
+            if (row == 2 && col == 15) { // Mountain Lake
+                gp.currentMap = 9;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(9, 1, "down");
+                worldX = 9*gp.tileSize;
+                worldY = 1*gp.tileSize;
+            }
+            if (row == 6 && col == 14) { // Ocean
+                gp.currentMap = 7;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(2, 2, "down");
+                worldX = 2*gp.tileSize;
+                worldY = 2*gp.tileSize;
+            }
+            if (row == 4 && col == 2) { // Forest River
+                gp.currentMap = 8;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 1, "down");
+                worldX = 7*gp.tileSize;
+                worldY = 1*gp.tileSize;
+            }
+        } else if (gp.currentMap == 6) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==11 && col == 16) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(7, 3, "down");
+                worldX = 7*gp.tileSize;
+                worldY = 3*gp.tileSize;
+            }
+        } else if (gp.currentMap == 1) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(5, 3, "down");
+                worldX = 5*gp.tileSize;
+                worldY = 3*gp.tileSize;
+            }
+        } else if (gp.currentMap == 2) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(5, 5, "up");
+                worldX = 5*gp.tileSize;
+                worldY = 5*gp.tileSize;
+            }
+        } else if (gp.currentMap == 3) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(11, 5, "up");
+                worldX = 11*gp.tileSize;
+                worldY = 5*gp.tileSize;
+            }
+        } else if (gp.currentMap == 4) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(11, 3, "down");
+                worldX = 11*gp.tileSize;
+                worldY = 3*gp.tileSize;
+            }
+        } else if (gp.currentMap == 5) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(9, 3, "down");
+                worldX = 9*gp.tileSize;
+                worldY = 3*gp.tileSize;
+            }
+        } else if (gp.currentMap == 11) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==8 && col == 7) {
+                gp.currentMap = 0;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(14, 15, "down");
+                worldX = 14*gp.tileSize;
+                worldY = 15*gp.tileSize;
+            }
+        } else if (gp.currentMap == 8) {
+            if (row == 0 || col == 0 || row == gp.maxWorldRow-1 || col == gp.maxWorldCol-1) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(3, 4, "right");
+                worldX = 3*gp.tileSize;
+                worldY = 4*gp.tileSize;
+            }
+        } else if (gp.currentMap == 7) {
+            if (row == 0 || col == 0 || row == gp.maxWorldRow-1 || col == gp.maxWorldCol-1) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(14, 5, "up");
+                worldX = 14*gp.tileSize;
+                worldY = 5*gp.tileSize;
+            }
+        } else if (gp.currentMap == 9) {
+            if (row == 0 || col == 0 || row == gp.maxWorldRow-1 || col == gp.maxWorldCol-1) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(15, 3, "down");
+                worldX = 15*gp.tileSize;
+                worldY = 3*gp.tileSize;
             }
         }
     }
@@ -455,9 +675,34 @@ public class Player implements Action {
         }
     }
 
+    public void interactWithNPC(NPC npc) {
+        if (npc.getName().equals("Emily")) {
+            gp.ui.setEmilyInteractionMode(npc);
+        } else {
+            String dialog = getNPCDialog(npc, null);
+            gp.ui.showMessage(npc.getName()+": "+dialog);
+            if (npc.getFreqChat() == 0) {
+                npc.setFreqChat(npc.getFreqChat()+1);
+            }
+        }
+    }
 
-
-
+    public String getNPCDialog(NPC npc, Items itemGiven) {
+        List<String> dialogues = gp.ui.npcDialogues.get(npc.getName());
+        if (dialogues == null) return "[NPC tidak memiliki dialog!]";
+        if (itemGiven == null) {
+            if (npc.getFreqChat() == 0) {
+                return dialogues.get(0); // perkenalan
+            } else {
+                return dialogues.get((int)(Math.random() * 5)); // random dari 0–4 (kecuali 5-7)
+            }
+        } else {
+            if (npc.getLovedItems().contains(itemGiven)) return dialogues.get(1);
+            else if (npc.getLikedItems().contains(itemGiven)) return dialogues.get(2);
+            else if (npc.getHatedItems().contains(itemGiven)) return dialogues.get(3);
+            else return dialogues.get(4);
+        }
+    }
     //Name
     public String getName(){
         return name;
@@ -503,12 +748,12 @@ public class Player implements Action {
         itemHeld = item;
     }
 
-    //Current Map
-    public Map getCurrentMap(){
+    //Current Maps
+    public Maps getCurrentMap(){
         return currentMap;
     }
 
-    public void setCurrentMap(Map map){
+    public void setCurrentMap(Maps map){
         currentMap = map;
     }
 

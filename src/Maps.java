@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
-public class Map {
+public class Maps {
     private String mapName;
     private int column;
     private int row;
     private Tile[][] tiles;
 
-    public Map(String mapName, int column, int row, String filePath) throws IOException {
+    public Maps(String mapName, int column, int row, String filePath) throws IOException {
         this.mapName = mapName;
         this.column = column;
         this.row = row;
