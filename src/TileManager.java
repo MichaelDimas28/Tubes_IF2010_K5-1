@@ -25,7 +25,7 @@ import java.util.Map;
         this.gp = gp;
 
         // untuk membaca tiledata.txt
-        InputStream is = getClass().getResourceAsStream("/maps/farmmaptiledata32.txt");
+        InputStream is = getClass().getResourceAsStream("/maps/tiledata.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         
         // untuk menyimpan data collision dari setiap tile dari tiledata.txt
@@ -45,7 +45,7 @@ import java.util.Map;
         getTileImage();
 
         //mendapatkan row dan col map
-        is = getClass().getResourceAsStream("/maps/farmmapextend.txt");
+        is = getClass().getResourceAsStream("/maps/farm_map.txt");
         br = new BufferedReader(new InputStreamReader(is));
 
         try {
@@ -63,7 +63,7 @@ import java.util.Map;
         mapCols = new int[gp.maxMap];
         mapRows = new int[gp.maxMap];
 
-        loadMap("/maps/farmmapextend.txt", 0, 32, 32);
+        loadMap("/maps/farm_map.txt", 0, 32, 32);
         loadMap("/maps/npc_house.txt", 1, 16, 9);
         loadMap("/maps/npc_house.txt", 2, 16, 9);
         loadMap("/maps/npc_house.txt", 3, 16, 9);
@@ -71,9 +71,9 @@ import java.util.Map;
         loadMap("/maps/npc_house.txt", 5, 16, 9);
         loadMap("/maps/store.txt", 6, 18, 12);
         loadMap("/maps/ocean.txt", 7, 5, 10);
-        loadMap("/maps/cutted_forest_map.txt", 8, 21, 21);
-        loadMap("/maps/cutted_mountain_map.txt", 9, 20, 20);
-        loadMap("/maps/WorldMap.txt", 10, 16, 8);
+        loadMap("/maps/forest_river.txt", 8, 21, 21);
+        loadMap("/maps/mountain_lake.txt", 9, 20, 20);
+        loadMap("/maps/world_map.txt", 10, 16, 8);
         loadMap("/maps/npc_house.txt", 11, 16, 9); // House
     }
     
