@@ -15,6 +15,9 @@ public class NPC {
     public int solidAreaDefaultX, solidAreaDefaultY;
     public boolean collisionOn = false;
     public int mapIndex;
+    private boolean hasTalkedToday = false;
+    private boolean hasGivenToday = false;
+    private boolean hasVisitedToday = false;
 
     private String name;
     private Gender gender;
@@ -67,6 +70,35 @@ public class NPC {
         return name;
     }
 
+    public void resetDailyFlags() {
+        hasTalkedToday = false;
+        hasGivenToday = false;
+        hasVisitedToday = false;
+    }
+
+    public boolean getHasTalked() {
+        return hasTalkedToday;
+    }
+    public boolean getHasGift() {
+        return hasGivenToday;
+    }
+    public boolean getHasVisited() {
+        return hasVisitedToday;
+    }
+    public void setHasTalked(boolean hasTalkedToday) {
+        this.hasTalkedToday = hasTalkedToday;
+    }
+    public void setHasGift(boolean hasGivenToday) {
+        this.hasGivenToday = hasGivenToday;
+    }
+    public void setHasVisited(boolean hasVisitedToday) {
+        this.hasVisitedToday = hasVisitedToday;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
     public int getHeartPoints() {
         return heartPoints;
     }
@@ -94,6 +126,7 @@ public class NPC {
 
     public void chat() {
         // Implement chat logic here
+        gp.ui.drawDialogueScreen();
     }
 
     public List<Items> getLovedItems() {

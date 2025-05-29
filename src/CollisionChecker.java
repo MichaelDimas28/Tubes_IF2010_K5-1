@@ -82,11 +82,12 @@ public class CollisionChecker {
 
         // Prediksi arah gerakan
         switch (player.direction) {
-            case "up":    playerSolidArea.y -= player.speed; break;
-            case "down":  playerSolidArea.y += player.speed; break;
-            case "left":  playerSolidArea.x -= player.speed; break;
-            case "right": playerSolidArea.x += player.speed; break;
+            case "up":    playerSolidArea.y -= gp.tileSize / 2; break;
+            case "down":  playerSolidArea.y += gp.tileSize / 2; break;
+            case "left":  playerSolidArea.x -= gp.tileSize / 2; break;
+            case "right": playerSolidArea.x += gp.tileSize / 2; break;
         }
+
 
         for (int i = 0; i < npcs.size(); i++) {
             NPC npc = npcs.get(i);
@@ -105,6 +106,7 @@ public class CollisionChecker {
                 }
             }
         }
+
 
         return index;
     }

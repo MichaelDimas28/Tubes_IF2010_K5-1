@@ -36,11 +36,6 @@ public class Player implements Action {
     int fishingPhase = 0; // 0 = belum dimulai, 1 = rod_1, 2 = rod_2
     int fishingFrameCounter = 0;
 
-
-    public Equipment wateringCan = new Equipment("Watering Can", "wateringcan.png");
-    public Equipment hoe = new Equipment("Hoe", "hoe.png");
-    public Equipment fishingRod = new Equipment("Fishing Rod", "fishingrod.png");
-
     public UI ui;
     GamePanel gp;
     KeyHandler keyH;
@@ -66,6 +61,7 @@ public class Player implements Action {
     private int fish_caught = 0;
     private Coordinate coordinate = new Coordinate(0,0);
     private Inventory inventory = new Inventory();
+    // public final int maxInventorySize = 60;
     private List<NPC> npcRelationshipStats = new ArrayList<>();
    
     //Constructor
@@ -91,6 +87,7 @@ public class Player implements Action {
         getPlayerHoeImage();
         getPlayerWaterImage();
         getPlayerFishingImage();
+        setItems();
     }
 
     public void setDefaultValues(int worldX, int worldY, String direction) {
@@ -164,7 +161,18 @@ public class Player implements Action {
         return image;
     }
 
+    public void setItems() {
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Watering Can"), 1));
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Hoe"), 1));
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Fishing Rod"), 1));
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Pickaxe"), 1));
+    }
+
     public void update() {
+        if (gp.dialogueOn) {
+            return;
+        }
+
         if (tilling) {
             tilling();
         }
@@ -217,10 +225,10 @@ public class Player implements Action {
                 gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
 
 
-            } else if (itemHeld != null && keyH.spacePressed && itemHeld!= null && !watering && !fishing && !tilling) {
+            } else if (itemHeld != null && keyH.spacePressed && itemHeld!= null && !watering && !fishing && !tilling && !gp.dialogueOn) {
                 int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
-                if (npcIndex != 1) {
-                    NPC npc = gp.npcManager.npcs[npcIndex];
+                if (npcIndex != -1) {
+                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
                     interactWithNPC(npc);
                 }
                 keyH.spacePressed = false;
@@ -680,8 +688,12 @@ public class Player implements Action {
             gp.ui.setEmilyInteractionMode(npc);
         } else {
             String dialog = getNPCDialog(npc, null);
-            gp.ui.showMessage(npc.getName()+": "+dialog);
-            if (npc.getFreqChat() == 0) {
+            // gp.ui.showMessage(npc.getName()+": "+dialog);
+            gp.ui.currentDialogue = npc.getName()+": "+dialog;
+            gp.dialogueOn = true;
+            if (!npc.getHasTalked()) {
+                npc.setHasTalked(true);
+                npc.setHeartPoints(npc.getHeartPoints()+10);
                 npc.setFreqChat(npc.getFreqChat()+1);
             }
         }
@@ -694,7 +706,7 @@ public class Player implements Action {
             if (npc.getFreqChat() == 0) {
                 return dialogues.get(0); // perkenalan
             } else {
-                return dialogues.get((int)(Math.random() * 5)); // random dari 0–4 (kecuali 5-7)
+                return dialogues.get(5+ (int)(Math.random() * 3)); // random dari 5-7
             }
         } else {
             if (npc.getLovedItems().contains(itemGiven)) return dialogues.get(1);

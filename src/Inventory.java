@@ -8,9 +8,18 @@ public class Inventory {
         this.items = new ArrayList<>();
     }
 
-    public void addItem(InventoryItem item) {
-        items.add(item);
+    public void addItem(InventoryItem newItem) {
+        for (InventoryItem invItem : items) {
+            if (invItem.getItem().getItemName().equals(newItem.getItem().getItemName())) {
+                // Item sudah ada, tambahkan quantity saja
+                invItem.setQuantity(invItem.getQuantity() + newItem.getQuantity());
+                return; // keluar dari method, tidak menambah item baru
+            }
+        }
+        // Jika item belum ada, tambahkan ke list
+        items.add(newItem);
     }
+
 
     public void removeItem(InventoryItem item) {
         items.remove(item);
@@ -22,5 +31,9 @@ public class Inventory {
     */
     public List<InventoryItem> getItems() {
         return items;
+    }
+
+    public int totalItems() {
+        return items.size();
     }
 }

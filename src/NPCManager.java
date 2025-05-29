@@ -244,10 +244,15 @@ public void loadNPCDialogues() {
             if (npc != null) {
                 int screenX = npc.worldX - gp.player.worldX + gp.player.screenX;
                 int screenY = npc.worldY - gp.player.worldY + gp.player.screenY;
-
+                
                 g2.drawImage(npc.idle, screenX, screenY+10, gp.tileSize, gp.tileSize*175/100, null);
             }
         }
+    }
+    
+    public List<NPC> getCurrentMapNPCs() {
+        List<NPC> currentMapNPCs = npcMapList[gp.currentMap];
+        return currentMapNPCs;
     }
 
     // public Collection<Items> getAllItems() {

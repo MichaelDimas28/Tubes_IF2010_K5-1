@@ -1,5 +1,7 @@
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -13,6 +15,9 @@ public class UI {
     public boolean messageOn = false;
     public String message = "";
     int messageCounter = 0;
+    public String currentDialogue = "";
+    public int slotCol = 0;
+    public int slotRow = 0;
 
     private Farm farm;
 
@@ -47,6 +52,11 @@ public class UI {
             int y = gp.screenHeight/2;
             g2.drawString(text, x, y);
         }
+
+        if (gp.inventoryOpen) {
+            drawInventory();
+            return;
+        }
         if (messageOn) {
             g2.drawString(message, 100, 100);
             messageCounter++;
@@ -56,14 +66,110 @@ public class UI {
             }
         }
 
+        if (gp.dialogueOn) {
+            drawDialogueScreen();
+            return;
+        }
+
         drawTimeWindow(g2);
         if (emilyMenuActive) {
-            g2.setColor(new Color(0,0,0,170));
-            g2.fillRect(100, 100, 300, 150);
+            int frameX = 100;
+            int frameY = 100;
+            int width = 300;
+            int height = 150;
+
+            drawSubWindow(frameX, frameY, width, height);
+            g2.setFont(arial_40.deriveFont(Font.PLAIN, 24F));
             g2.setColor(Color.white);
-            g2.drawString("Talk", 120, 150);
-            g2.drawString("Buy", 120, 200);
+
+            String[] options = {"Talk", "Buy"};
+            for (int i = 0; i < options.length; i++) {
+                if (i == emilyMenuSelection) {
+                    g2.setColor(Color.YELLOW); // highlight pilihan
+                } else {
+                    g2.setColor(Color.white);
+                }
+                g2.drawString(options[i], frameX + 20, frameY + 50 + i * 40);
+            }
+
         }
+    }
+
+    public void drawInventory() {
+        // FRAME
+        int frameX = gp.tileSize;
+        int frameY = gp.tileSize;
+        int width = gp.screenWidth - (gp.tileSize*2);
+        int height = gp.tileSize*6;
+        drawSubWindow(frameX, frameY, width, height);
+
+        //SLOT
+        final int slotXstart = frameX + 20;
+        final int slotYstart = frameY + 20;
+        int slotX = slotXstart;
+        int slotY = slotYstart;
+
+        //CURSOR
+        int cursorX = slotXstart + (gp.tileSize * slotCol);
+        int cursorY = slotYstart + (gp.tileSize * slotRow);
+        int cursorWidth = gp.tileSize;
+        int cursorHeight = gp.tileSize;
+
+        // DRAW CURSOR
+        g2.setColor(Color.white);
+        g2.setStroke(new BasicStroke(3));
+        g2.drawRoundRect(cursorX, cursorY, cursorWidth, cursorHeight, 10, 10);
+
+        // DRAW PLAYER'S ITEMS
+        for (int i = 0; i<gp.player.getInventory().totalItems(); i++) {
+            InventoryItem invItem = gp.player.getInventory().getItems().get(i);
+            BufferedImage itemImage = invItem.getItem().getImage();
+            if (itemImage != null) {
+                g2.drawImage(itemImage, slotX, slotY, null);
+            }
+            String quantityText = String.valueOf(invItem.getQuantity());
+            g2.setFont(new Font("Arial", Font.BOLD, 14));
+            g2.setColor(Color.white);
+            g2.drawString(quantityText, slotX + 30, slotY + 40); // atur offset sesuai selera
+            slotX += gp.tileSize;
+            if (slotX >= slotXstart + (gp.tileSize*13)) {
+                slotX = slotXstart;
+                slotY += gp.tileSize;
+            }
+        }
+        // DRAW DESKRIPSI NAMA ITEM
+        int index = slotRow * 13 + slotCol;
+        InventoryItem selectedItem = gp.player.getInventory().getItems().get(index);
+
+        int subX = frameX;
+        int subY = frameY + height + 10; // 10px di bawah inventory
+        int subWidth = 200;
+        int subHeight = 50;
+
+        drawSubWindow(subX, subY, subWidth, subHeight);
+        if (selectedItem != null && selectedItem.getItem() != null) {
+            g2.setColor(Color.white);
+            g2.setFont(g2.getFont().deriveFont(20f));
+            g2.drawString(selectedItem.getItem().getItemName(), subX + 10, subY + 30);
+        }
+
+        // DRAW HELD ITEMS
+        int heldX = frameX;
+        // int heldY = subY + height + gp.tileSize;
+        int heldY = subY + subHeight + 10;
+        int heldWidth = gp.tileSize * 5;
+        int heldHeight = gp.tileSize + 10;
+
+        drawSubWindow(heldX, heldY, heldWidth, heldHeight);
+
+        g2.setColor(Color.white);
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 28F));
+        g2.drawString("Held Item:", heldX + 20, heldY + 40);
+
+        if (gp.player.getItemHeld() != null) {
+            g2.drawImage(gp.player.getItemHeld().getImage(), heldX + gp.tileSize * 35/10, heldY + 4, gp.tileSize, gp.tileSize, null);
+        }
+
     }
 
     public void drawTimeWindow(Graphics2D g2) {
@@ -86,6 +192,62 @@ public class UI {
         g2.drawString("Weather: " + farm.getWeather(), x + 10, y + 65);
         g2.drawString("Season: " + farm.getSeason().name(), x + 10, y + 85);
     }
+
+    public void drawDialogueScreen() {
+        int frameX = gp.tileSize;
+        int frameY = gp.screenHeight - gp.tileSize*4;
+        int width = gp.screenWidth - (gp.tileSize*2);
+        int height = gp.tileSize*3;
+        drawSubWindow(frameX, frameY, width, height);
+
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN,24F));
+        int textX = frameX + gp.tileSize / 2;
+        int textY = frameY + gp.tileSize / 2;
+
+        int maxWidth = width - gp.tileSize;
+        drawWrappedText(currentDialogue, textX, textY, maxWidth);
+        // for (String line: currentDialogue.split("\n")) {
+        //     g2.drawString(line, frameX, frameY);
+        //     frameY +=40 ;
+        // }
+    }
+
+    public void drawSubWindow(int x, int y, int width, int height) {
+        Color bgColor = new Color(0, 0, 0, 180);
+        Color borderColor = Color.white;
+
+        g2.setColor(bgColor);
+        g2.fillRoundRect(x, y, width, height, 35, 35);
+
+        g2.setStroke(new BasicStroke(3));
+        g2.setColor(borderColor);
+        g2.drawRoundRect(x, y, width, height, 35, 35);
+    }
+
+
+
+    private void drawWrappedText(String text, int x, int y, int maxWidth) {
+        FontMetrics fm = g2.getFontMetrics();
+        int lineHeight = fm.getHeight();
+
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (int i = 0; i < words.length; i++) {
+            String testLine = line + words[i] + " ";
+            int testWidth = fm.stringWidth(testLine);
+            if (testWidth > maxWidth) {
+                g2.drawString(line.toString(), x, y);
+                y += lineHeight;
+                line = new StringBuilder(words[i] + " ");
+            } else {
+                line.append(words[i]).append(" ");
+            }
+        }
+
+        // Draw sisa baris terakhir
+        g2.drawString(line.toString(), x, y);
+}
 
 
     private int getCenteredX(String text) {

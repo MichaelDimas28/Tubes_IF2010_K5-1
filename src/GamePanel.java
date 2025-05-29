@@ -37,9 +37,9 @@ public class GamePanel extends JPanel implements Runnable {
     UI ui = new UI(this, this.farm);
     Thread gameThread;
     public CollisionChecker collisionChecker = new CollisionChecker(this);
-    public Player player = new Player("Test", Gender.Male, 100, 0, this, keyH);
     public ItemManager itemManager = new ItemManager();
     public NPCManager npcManager = new NPCManager(this);
+    public Player player = new Player("Test", Gender.Male, 100, 0, this, keyH);
 
     // public int gameState;
     // public final int playState = 1;
@@ -47,6 +47,7 @@ public class GamePanel extends JPanel implements Runnable {
     // public final int dialogueState = 3;
     public boolean gamePaused = false;
     public boolean dialogueOn = false;
+    public boolean inventoryOpen = false;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -94,7 +95,12 @@ public class GamePanel extends JPanel implements Runnable {
             keyH.pPressed = false;
         }
 
-        if (!gamePaused) {
+        if (keyH.iPressed) {
+            inventoryOpen = !inventoryOpen;
+            keyH.iPressed = false;
+        }
+
+        if (!gamePaused && !inventoryOpen) {
             player.update();
         }
     }
@@ -107,6 +113,10 @@ public class GamePanel extends JPanel implements Runnable {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("PAUSED", screenWidth / 2 - 100, screenHeight / 2);
+        }
+
+        if (inventoryOpen) {
+            ui.drawInventory();
         }
 
 
