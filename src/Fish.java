@@ -5,7 +5,7 @@ public class Fish extends Items implements Edible {
     private List<String> seasonAppear;         // bisa lebih dari 1
     private List<int[]> timeAppear;            // setiap int[] = {start, end}
     private List<String> locationAppear;       // bisa lebih dari 1 lokasi
-    private List<String> weatherAppear;        // bisa ["Any"], ["Sunny"], ["Rainy"], dll
+    private List<String> weatherAppear;        // bisa ["Any"], ["Sunny"], ["Rainy"]
     private Rarity rarity;                 // enum: COMMON, REGULAR, LEGENDARY
     private final int energy = 1;
 

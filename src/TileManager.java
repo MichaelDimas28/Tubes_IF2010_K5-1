@@ -121,7 +121,7 @@ import java.util.Map;
     // Untuk mengecek apakah ada Tiles yang ada pada tiledata namun tidak ada pada folder tiles
     //     InputStream stream = getClass().getResourceAsStream("/tiles/" + imageName);
     // if (stream == null) {
-    //     System.err.println("❌ Tile image missing: " + imageName);
+    //     System.err.println(" Tile image missing: " + imageName);
     //     return; // skip setup
     // }
 
