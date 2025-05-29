@@ -1,8 +1,8 @@
 x x x x x x x x x x x x x L L L 16
 x x x x x x x x x x x x x L L L 32
 R R R R x H x S x H x H x L L L 48
-R R R R X . x . x . x . x x . x 64
-R R R . . . . . . . . . . . . x 80
+R R R R X . x . x . x . x x x . 64
+R R R . . . . . . . . . . . . . 80
 R R R X X . x F F F x . x x . x 96
 R R R X x H x F F F x H x O O O 112
 X X X X X X X X X X X X X O O O 128
