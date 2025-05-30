@@ -25,13 +25,13 @@ public class GamePanel extends JPanel implements Runnable {
     // World Settings
     public int maxWorldCol;
     public int maxWorldRow;
-    public final int maxMap = 12; // Total jumlah map yang ada
+    public final int maxMap = 13; // Total jumlah map yang ada
     public int currentMap = 0;
     public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
     
     Timer gameClockTimer;
-    Farm farm = new Farm(Weather.Sunny, 1, Season.Spring, new Time(6, 0));
+    Farm farm = new Farm(Weather.Sunny, 1, Season.Spring, new Time(6, 0), new ShippingBin());
     TileManager tileM = new TileManager(this);
     KeyHandler keyH = new KeyHandler(this);
     UI ui = new UI(this, this.farm);
@@ -48,6 +48,7 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean gamePaused = false;
     public boolean dialogueOn = false;
     public boolean inventoryOpen = false;
+    public boolean binOpen = false;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -58,8 +59,10 @@ public class GamePanel extends JPanel implements Runnable {
         gameClockTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!gamePaused) { // Tambahkan kondisi jika game bisa pause
-                farm.getTime().skipTime(1, farm); // Tambah 1 menit per 1 detik
+            if (!gamePaused && !inventoryOpen && !dialogueOn) { // Tambahkan kondisi jika game bisa pause
+                farm.getTime().skipTime(5, farm); // Tambah 5 menit per 1 detik
+            } else {
+                farm.getTime().skipTime(0, farm); // Waktu berhenti ketika membuka inventory dan pause dan berbicara dengan NPC
             }
             }
         });
@@ -100,7 +103,7 @@ public class GamePanel extends JPanel implements Runnable {
             keyH.iPressed = false;
         }
 
-        if (!gamePaused && !inventoryOpen) {
+        if (!gamePaused && !inventoryOpen && !binOpen) {
             player.update();
         }
     }
@@ -117,6 +120,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (inventoryOpen) {
             ui.drawInventory();
+            ui.drawHeldItemsInventory();
         }
 
 

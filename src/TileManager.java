@@ -73,24 +73,10 @@ import java.util.Map;
         loadMap("/maps/ocean.txt", 7, 5, 10);
         loadMap("/maps/forest_river.txt", 8, 21, 21);
         loadMap("/maps/mountain_lake.txt", 9, 20, 20);
-        loadMap("/maps/world_map.txt", 10, 16, 8);
-        loadMap("/maps/npc_house.txt", 11, 16, 9); // House
+        loadMap("/maps/world_map.txt", 10, 18, 8);
+        loadMap("/maps/player_house.txt", 11, 24, 24); // House
+        loadMap("/maps/player_house.txt", 12, 24, 24); // House
     }
-    
-    // public void getTileImage() {
-        //     for (int i=0 ; i < fileNames.size() ; i++) {
-            //         String fileName;
-    //         boolean collision;
-
-    //         fileName = fileNames.get(i);
-    //         if (collisionStatus.get(i).equals("true")) {
-    //             collision = true;
-    //         } else {
-    //             collision = false;
-    //         }
-    //         setup(i, fileName, collision);
-    //     }
-    // }
 
     public void getTileImage() {
     for (int i = 0; i < fileNames.size(); i++) {
@@ -103,19 +89,6 @@ import java.util.Map;
     }
 }
 
-
-    // public void setup(int index, String imageName, boolean collision) {
-    //     // UtilityTool uTool = new UtilityTool();
-
-    //     try {
-    //         tile[index] = new Tile();
-    //         tile[index].image = ImageIO.read(getClass().getResourceAsStream("/tiles/"+imageName));
-    //         // tile[index].image = uTool.scaleImage(tile[index].image, gp.tileSize, gp.tileSize);
-    //         tile[index].collision = collision;
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-    // }
     public void setup(int index, String imageName, boolean collision) {
         UtilityTool uTool = new UtilityTool();
     // Untuk mengecek apakah ada Tiles yang ada pada tiledata namun tidak ada pada folder tiles
@@ -128,6 +101,7 @@ import java.util.Map;
     try {
         Tile newTile = new Tile();
         newTile.image = ImageIO.read(getClass().getResourceAsStream("/tiles/" + imageName));
+        newTile.imageName = imageName;
         newTile.image = uTool.scaleImage(newTile.image, gp.tileSize, gp.tileSize);
         newTile.collision = collision;
         tileMap.put(index, newTile);  // pakai HashMap
@@ -136,6 +110,38 @@ import java.util.Map;
         e.printStackTrace();
     }
 }
+
+    public boolean isShippingBin(int tileIndex) {
+        return tileIndex == 222 || tileIndex == 211 || tileIndex == 200 || tileIndex == 255 || tileIndex == 244 || tileIndex == 233;
+    }
+
+    public String getFrontTile() {
+        int tileX = gp.player.worldX / gp.tileSize;
+        int tileY = gp.player.worldY / gp.tileSize;
+
+        switch (gp.player.direction) {
+            case "up":
+                tileY -= 1;
+                break;
+            case "down":
+                tileY += 1;
+                break;
+            case "left":
+                tileX -= 1;
+                break;
+            case "right":
+                tileX += 1;
+                break;
+        }
+
+    if (tileX >= 0 && tileX < gp.maxWorldCol && tileY >= 0 && tileY < gp.maxWorldRow) {
+        int tileIndex = mapTileNum[gp.currentMap][tileX][tileY];
+            return gp.tileM.tileMap.get(tileIndex).getImageName();
+        } else {
+            return null; // di luar batas map
+        }
+    }
+
 
 
     public void loadMap(String mapFile, int map, int colSize, int rowSize) {

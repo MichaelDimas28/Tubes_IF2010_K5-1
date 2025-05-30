@@ -17,7 +17,7 @@ public class NPCManager {
     @SuppressWarnings("unchecked")
     public NPCManager(GamePanel gp) {
         this.gp = gp;
-        npcs = new NPC[6]; // jumlah NPC statis
+        npcs = new NPC[11]; // jumlah NPC
         npcMapList = new ArrayList[gp.maxMap];
         for (int i = 0; i < gp.maxMap ; i++) {
             npcMapList[i] = new ArrayList<>();
@@ -192,7 +192,7 @@ public void loadNPCDialogues() {
             itemManager.getItem("Firewood")
         );
     
-        NPC emily = new NPC("Emily", Gender.Male, 0,
+        NPC emily = new NPC("Emily", Gender.Female, 0,
             npcDialogues.get("Emily"), RelationshipStatus.Single, 0, 0, 0,
             emilyLoved, emilyLiked, emilyHated);
         emily.gp = gp;
@@ -224,7 +224,7 @@ public void loadNPCDialogues() {
             itemManager.getItem("Wheat")
         );
     
-        NPC abigail = new NPC("Abigail", Gender.Male, 0,
+        NPC abigail = new NPC("Abigail", Gender.Female, 0,
             npcDialogues.get("Abigail"), RelationshipStatus.Single, 0, 0, 0,
             abigailLoved, abigailLiked, abigailHated);
         abigail.gp = gp;
@@ -235,6 +235,145 @@ public void loadNPCDialogues() {
         abigail.setMapIndex(5);
         npcMapList[5].add(abigail);
         abigail.setDefaultSolidArea();
+
+        // Ar
+        List<Items> arLoved = List.of(
+            itemManager.getItem("Fish n' Chips")
+        );
+        List<Items> arLiked = List.of(
+            itemManager.getItem("Potato")
+        );
+        List<Items> arHated = List.of(
+            itemManager.getItem("The Legends of Spakbor")
+        );
+    
+        NPC ar = new NPC("Ar", Gender.Male, 0,
+            npcDialogues.get("Ar"), RelationshipStatus.Single, 0, 0, 0,
+            arLoved, arLiked, arHated);
+        ar.gp = gp;
+        ar.idle = ar.setup("ar.png", gp.tileSize, gp.tileSize);
+        ar.worldX = gp.tileSize * 8;
+        ar.worldY = gp.tileSize * 5;
+        npcs[6] = ar;
+        ar.setMapIndex(12);
+        npcMapList[12].add(ar);
+        ar.setDefaultSolidArea();
+
+        // Flo
+        List<Items> floLoved = List.of(
+            itemManager.getItem("Baguette"),
+            itemManager.getItem("Fish n' Chips"),
+            itemManager.getItem("Cranberry")
+        );
+        List<Items> floLiked = List.of(
+            itemManager.getItem("Wheat"),
+            itemManager.getItem("Fish Sandwich"),
+            itemManager.getItem("Sashimi")
+        );
+        List<Items> floHated = List.of(
+            itemManager.getItem("Veggie Soup"),
+            itemManager.getItem("Cauliflower"),
+            itemManager.getItem("Spakbor Salad")
+        );
+    
+        NPC flo = new NPC("Flo", Gender.Female, 0,
+            npcDialogues.get("Flo"), RelationshipStatus.Single, 0, 0, 0,
+            floLoved, floLiked, floHated);
+        flo.gp = gp;
+        flo.idle = flo.setup("flo.png", gp.tileSize, gp.tileSize);
+        flo.worldX = gp.tileSize * 7;
+        flo.worldY = gp.tileSize * 11;
+        npcs[7] = flo;
+        flo.setMapIndex(12);
+        npcMapList[12].add(flo);
+        flo.setDefaultSolidArea();
+        
+        // Mas
+        List<Items> masLoved = List.of(
+            itemManager.getItem("Tomato"),
+            itemManager.getItem("Bullhead"),
+            itemManager.getItem("Salmon")
+        );
+        List<Items> masLiked = List.of(
+            itemManager.getItem("Glacierfish"),
+            itemManager.getItem("Melon"),
+            itemManager.getItem("Baguette")
+        );
+        List<Items> masHated = List.of(
+            itemManager.getItem("Cooked Pig's Head"),
+            itemManager.getItem("Pumpkin"),
+            itemManager.getItem("Catfish")
+        );
+    
+        NPC mas = new NPC("Mas", Gender.Male, 0,
+            npcDialogues.get("Mas"), RelationshipStatus.Single, 0, 0, 0,
+            masLoved, masLiked, masHated);
+        mas.gp = gp;
+        mas.idle = mas.setup("mas.png", gp.tileSize, gp.tileSize);
+        mas.worldX = gp.tileSize * 16;
+        mas.worldY = gp.tileSize * 10;
+        npcs[8] = mas;
+        mas.setMapIndex(12);
+        npcMapList[12].add(mas);
+        mas.setDefaultSolidArea();
+        
+        // Rei
+        List<Items> reiLoved = List.of(
+            itemManager.getItem("Salmon")
+        );
+        List<Items> reiLiked = List.of(
+            itemManager.getItem("Catfish"),
+            itemManager.getItem("Pufferfish")
+        );
+        List<Items> reiHated = List.of(
+            itemManager.getItem("Parsnip"),
+            itemManager.getItem("Cauliflower"),
+            itemManager.getItem("Hot Pepper")
+        );
+    
+        NPC rei = new NPC("Rei", Gender.Male, 0,
+            npcDialogues.get("Rei"), RelationshipStatus.Single, 0, 0, 0,
+            reiLoved, reiLiked, reiHated);
+        rei.gp = gp;
+        rei.idle = rei.setup("rei.png", gp.tileSize, gp.tileSize);
+        rei.worldX = gp.tileSize * 19;
+        rei.worldY = gp.tileSize * 9;
+        npcs[9] = rei;
+        rei.setMapIndex(12);
+        npcMapList[12].add(rei);
+        rei.setDefaultSolidArea();
+       
+        // Fav
+        List<Items> favLoved = List.of(
+            itemManager.getItem("Salmon"),
+            itemManager.getItem("Catfish"),
+            itemManager.getItem("Fish n' Chips"),
+            itemManager.getItem("Sashimi"),
+            itemManager.getItem("Blueberry")
+        );
+        List<Items> favLiked = List.of(
+            itemManager.getItem("Potato"),
+            itemManager.getItem("Sardine"),
+            itemManager.getItem("Cranberry"),
+            itemManager.getItem("Grape")
+        );
+        List<Items> favHated = List.of(
+            itemManager.getItem("Parsnip"),
+            itemManager.getItem("Wine"),
+            itemManager.getItem("Cooked Pig's Head")
+        );
+    
+        NPC fav = new NPC("Fav", Gender.Male, 0,
+            npcDialogues.get("Fav"), RelationshipStatus.Single, 0, 0, 0,
+            favLoved, favLiked, favHated);
+        fav.gp = gp;
+        fav.idle = fav.setup("fav.png", gp.tileSize, gp.tileSize);
+        fav.worldX = gp.tileSize * 18;
+        fav.worldY = gp.tileSize * 18;
+        npcs[10] = fav;
+        fav.setMapIndex(12);
+        npcMapList[12].add(fav);
+        fav.setDefaultSolidArea();
     }
     
     

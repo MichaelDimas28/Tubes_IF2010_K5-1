@@ -3,15 +3,26 @@ import java.util.ArrayList;
 
 public class ShippingBin {
     private final int maxSlot = 16;
-    private List<Items> shippedItems;
+    private List<InventoryItem> shippedItems;
 
     public ShippingBin() {
         this.shippedItems = new ArrayList<>();
     }
 
-    public boolean addItem(Items item) {
+    public boolean addItem(InventoryItem item) {
         if (isFull()) {
             return false;
+        }
+
+        if (item.getItem().getSellPrice()==0) {
+            return false;
+        }
+
+        for (InventoryItem invItem : shippedItems) {
+            if (invItem.getItem().getItemName().equals(item.getItem().getItemName())) {
+                invItem.setQuantity(invItem.getQuantity()+1);
+                return true;
+            }
         }
         shippedItems.add(item);
         return true;
@@ -19,8 +30,8 @@ public class ShippingBin {
 
     public int calculatePrice() {
         int total = 0;
-        for (Items item : shippedItems) {
-            total += item.getSellPrice();
+        for (InventoryItem item : shippedItems) {
+            total += item.getItem().getSellPrice();
         }
         return total;
     }
@@ -33,7 +44,11 @@ public class ShippingBin {
         shippedItems.clear();
     }
 
-    public List<Items> getShippedItems() {
+    public List<InventoryItem> getShippedItems() {
         return shippedItems;
+    }
+
+    public int totalItems() {
+        return shippedItems.size();
     }
 }

@@ -8,19 +8,19 @@ public class Farm {
     private Time time = new Time(6, 0);
     // private Player farmer;
     // private FarmMap farm;
-    // private ShippingBin shippingBin;
+    private ShippingBin shippingBin;
     private Random randomGenerator = new Random();
     private int rainyDaysThisSeason = 0;
     private Weather weatherForTomorrow; 
 
-    Farm (Weather weather, int day, Season season, Time time) {
+    Farm (Weather weather, int day, Season season, Time time, ShippingBin shippingBin) {
         this.weather = weather;
         this.day = day;
         this.season = season;
         // this.farmer = farmer;
         // this.farm = farmMap;
         this.time = time;
-        // this.shippingBin = shippingBin;
+        this.shippingBin = shippingBin;
         if (this.weather == Weather.Rainy) { // Hitung hari hujan awal jika dimulai dengan hujan
             this.rainyDaysThisSeason = 1;
         }
@@ -54,9 +54,9 @@ public class Farm {
     public Season getSeason() {
         return season;
     }
-    // public ShippingBin getShippingBin() {
-    //     return shippingBin;
-    // }
+    public ShippingBin getShippingBin() {
+        return shippingBin;
+    }
     // public String getFarmName() {
     //     return farmName;
     // }

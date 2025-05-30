@@ -24,6 +24,8 @@ public class Player implements Action {
     public boolean tilling = false;
     public boolean watering = false;
     public boolean fishing = false;
+    public boolean recoverLand = false;
+
     public boolean canTill = true;
     public int tillCooldownCounter = 0;
     public final int tillCooldownMax = 30; // frame (30 = 0.5 detik kalau 60FPS)
@@ -63,13 +65,15 @@ public class Player implements Action {
     private Inventory inventory = new Inventory();
     // public final int maxInventorySize = 60;
     private List<NPC> npcRelationshipStats = new ArrayList<>();
+
+    private String forbiddenMessage = "Anda tidak bisa menggunakan item ini di sini";
    
     //Constructor
     public Player(String name, Gender gender, int energy, int gold, GamePanel gp, KeyHandler keyH){
         this.name = name;
         this.gender = gender;
         this.energy = energy;
-        this. gold = gold;
+        this.gold = gold;
         this.gp = gp;
         this.keyH = keyH;
 
@@ -166,6 +170,8 @@ public class Player implements Action {
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Hoe"), 1));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Fishing Rod"), 1));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Pickaxe"), 1));
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip Seeds"), 15));
+        inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip"), 10));
     }
 
     public void update() {
@@ -175,6 +181,19 @@ public class Player implements Action {
 
         if (tilling) {
             tilling();
+            tile();
+        }
+        if (!canTill) {
+            tillCooldownCounter++;
+            if (tillCooldownCounter > tillCooldownMax) {
+                canTill = true;
+                tillCooldownCounter = 0;
+            }
+        }
+
+        if (recoverLand) {
+            tilling();
+            recoverLand();
         }
         if (!canTill) {
             tillCooldownCounter++;
@@ -186,6 +205,7 @@ public class Player implements Action {
 
         if (watering) {
             watering();
+            water();
         }
         if (!canWater) {
             waterCooldownCounter++;
@@ -197,6 +217,7 @@ public class Player implements Action {
 
         if (fishing) {
             fishing();
+            fish();
         }
         if (!canFish) {
             fishCooldownCounter++;
@@ -206,7 +227,7 @@ public class Player implements Action {
             }
         }
 
-        if (!moving && !tilling && !watering && !fishing) {
+        if (!moving && !tilling && !watering && !fishing && !recoverLand) {
             if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
                 if (keyH.upPressed) {
                     direction = "up";
@@ -232,19 +253,43 @@ public class Player implements Action {
                     interactWithNPC(npc);
                 }
                 keyH.spacePressed = false;
-            } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing) {
-                tilling = true;
-                canTill = false;
-                keyH.enterPressed = false;
-            } else if (itemHeld != null && keyH.enterPressed && canWater && itemHeld.getItemName().equals("Watering Can") && !tilling && !fishing) {
-                watering = true;
-                canWater = false;
-                keyH.enterPressed = false;
-            } else if (itemHeld != null && keyH.enterPressed && canFish && itemHeld.getItemName().equals("Fishing Rod") && !tilling && !watering) {
-                fishing = true;
-                fishingPhase = 1; // Mulai animasi dari rod_1 dulu
-                canFish = false;
-                keyH.enterPressed = false;
+            } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing && !recoverLand) {
+                if (gp.currentMap != 0) {
+                    forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
+                    gp.ui.showMessage(forbiddenMessage);
+                } else {
+                    tilling = true;
+                    canTill = false;
+                    keyH.enterPressed = false;
+                }
+            } else if (itemHeld != null && keyH.enterPressed && canWater && itemHeld.getItemName().equals("Watering Can") && !tilling && !fishing && !recoverLand) {
+                if (gp.currentMap != 0) {
+                    forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
+                    gp.ui.showMessage(forbiddenMessage);
+                } else {
+                    watering = true;
+                    canWater = false;
+                    keyH.enterPressed = false;
+                }
+            } else if (itemHeld != null && keyH.enterPressed && canFish && itemHeld.getItemName().equals("Fishing Rod") && !tilling && !watering && !recoverLand) {
+                if (gp.currentMap != 0 && gp.currentMap != 7 && gp.currentMap != 8 && gp.currentMap != 9) {
+                    forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
+                    gp.ui.showMessage(forbiddenMessage);
+                } else {
+                    fishing = true;
+                    fishingPhase = 1; // Mulai animasi dari rod_1 dulu
+                    canFish = false;
+                    keyH.enterPressed = false;
+                }
+            } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Pickaxe") && !tilling && !watering && !fishing) {
+                if (gp.currentMap != 0) {
+                    forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
+                    gp.ui.showMessage(forbiddenMessage);
+                } else {
+                    tilling = true;
+                    canTill = false;
+                    keyH.enterPressed = false;
+                }
             }
             else {
                 standCounter++;
@@ -254,7 +299,7 @@ public class Player implements Action {
                 }
             }
         }
-        if (moving && !tilling && !watering && !fishing) {
+        if (moving && !tilling && !watering && !fishing && !recoverLand) {
             //If collision false, player can move
             if (collisionOn == false) {
                 switch(direction) {
@@ -305,9 +350,9 @@ public class Player implements Action {
                 gp.currentMap = 11;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
-                setDefaultValues(7, 7, "up");
-                worldX = 7*gp.tileSize;
-                worldY = 7*gp.tileSize;
+                setDefaultValues(11, 22, "up");
+                worldX = 11*gp.tileSize;
+                worldY = 22*gp.tileSize;
             }
         } else if (gp.currentMap == 10) {
             gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
@@ -369,7 +414,15 @@ public class Player implements Action {
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
             }
-            if (row == 2 && col == 15) { // Mountain Lake
+            if (row==2 && col == 13) {
+                gp.currentMap = 12;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(11, 22, "up");
+                worldX = 11*gp.tileSize;
+                worldY = 22*gp.tileSize;
+            }
+            if (row == 2 && col == 17) { // Mountain Lake
                 gp.currentMap = 9;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
@@ -377,7 +430,7 @@ public class Player implements Action {
                 worldX = 9*gp.tileSize;
                 worldY = 1*gp.tileSize;
             }
-            if (row == 6 && col == 14) { // Ocean
+            if (row == 6 && col == 16) { // Ocean
                 gp.currentMap = 7;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
@@ -459,10 +512,21 @@ public class Player implements Action {
                 worldX = 9*gp.tileSize;
                 worldY = 3*gp.tileSize;
             }
+        } else if (gp.currentMap == 12) {
+            gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+            gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+            if (row==23 && col == 11) {
+                gp.currentMap = 10;
+                gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
+                gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
+                setDefaultValues(13, 3, "down");
+                worldX = 13*gp.tileSize;
+                worldY = 3*gp.tileSize;
+            }
         } else if (gp.currentMap == 11) {
             gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
             gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
-            if (row==8 && col == 7) {
+            if (row==23 && col == 11) {
                 gp.currentMap = 0;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
@@ -484,8 +548,8 @@ public class Player implements Action {
                 gp.currentMap = 10;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
-                setDefaultValues(14, 5, "up");
-                worldX = 14*gp.tileSize;
+                setDefaultValues(16, 5, "up");
+                worldX = 16*gp.tileSize;
                 worldY = 5*gp.tileSize;
             }
         } else if (gp.currentMap == 9) {
@@ -493,8 +557,8 @@ public class Player implements Action {
                 gp.currentMap = 10;
                 gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];
                 gp.maxWorldRow = gp.tileM.mapRows[gp.currentMap];
-                setDefaultValues(15, 3, "down");
-                worldX = 15*gp.tileSize;
+                setDefaultValues(17, 3, "down");
+                worldX = 17*gp.tileSize;
                 worldY = 3*gp.tileSize;
             }
         }
@@ -609,7 +673,7 @@ public class Player implements Action {
             break;
         }
 
-        if (itemHeld!=null && (itemHeld.getItemName().equals("Hoe") || itemHeld.getItemName().equals("Fishing Rod") || itemHeld.getItemName().equals("Watering Can"))) {
+        if ((gp.currentMap == 0 || gp.currentMap == 7 || gp.currentMap == 8 || gp.currentMap == 9) && itemHeld!=null && (itemHeld instanceof Equipment || itemHeld instanceof Seeds)) {
             g2.drawImage(guidebox, guideboxX, guideboxY, gp.tileSize, gp.tileSize, null);
         }
         g2.drawImage(image, tempScreenX, tempScreenY, null);
@@ -688,7 +752,6 @@ public class Player implements Action {
             gp.ui.setEmilyInteractionMode(npc);
         } else {
             String dialog = getNPCDialog(npc, null);
-            // gp.ui.showMessage(npc.getName()+": "+dialog);
             gp.ui.currentDialogue = npc.getName()+": "+dialog;
             gp.dialogueOn = true;
             if (!npc.getHasTalked()) {
@@ -706,7 +769,7 @@ public class Player implements Action {
             if (npc.getFreqChat() == 0) {
                 return dialogues.get(0); // perkenalan
             } else {
-                return dialogues.get(5+ (int)(Math.random() * 3)); // random dari 5-7
+                return dialogues.get(8+ (int)(Math.random() * 3)); // random dari 8-10
             }
         } else {
             if (npc.getLovedItems().contains(itemGiven)) return dialogues.get(1);
@@ -715,6 +778,7 @@ public class Player implements Action {
             else return dialogues.get(4);
         }
     }
+
     //Name
     public String getName(){
         return name;

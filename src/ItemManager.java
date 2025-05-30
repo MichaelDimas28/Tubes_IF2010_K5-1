@@ -88,6 +88,7 @@ public class ItemManager {
         itemMap.put("Fish Sandwich", new Food("Fish Sandwich", 200, 180, 50,List.of(anyFish, itemMap.get("Wheat"),  itemMap.get("Wheat"),  itemMap.get("Tomato"), itemMap.get("Hot Pepper")), "bread.png", false));
         itemMap.put("The Legends of Spakbor", new Food("The Legends of Spakbor", 0, 2000, 100,List.of(legendFish, itemMap.get("Potato"),  itemMap.get("Potato"),  itemMap.get("Parsnip"), itemMap.get("Tomato"), itemMap.get("Eggplant")), "legendspakbor.png", false));
         itemMap.put("Cooked Pig's Head", new Food("Cooked Pig's Head", 1000, 0, 100, "pighead.png"));
+        itemMap.put("Egg", new Food("Egg", 75, 30, 20, "egg.png"));
 
         // Equipments
         itemMap.put("Hoe", new Equipment("Hoe", "hoe.png"));
