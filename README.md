@@ -11,7 +11,8 @@ Anggota:
 - 18223076 Michael Dimas Sarono
 
 ## Deskripsi Game
-Game ini adalah game simulasi pertanian yang dibuat dengan gaya retro. Dalam game ini kamu dapat menjalani hidup mu sebagai petani kelinci dan berinteraksi dengan komunitas di kota tersebut.
+Game ini adalah game simulasi pertanian yang dibuat dengan gaya retro. Dalam game ini kamu dapat menjalani hidup mu sebagai petani kelinci dan berinteraksi dengan komunitas di kota tersebut. Objektif dalam game ini adalah untuk menikah dan mempunyai minimal 17209 gold
+
 
 ## Cara Memainkan Game
 ### Requirements
@@ -37,3 +38,4 @@ Untuk memainkan game ini dibutuhkan
 - `enter` untuk memakai tool
 - `enter + bergerak` untuk makan 
 - `esc` untuk keluar menu
+
