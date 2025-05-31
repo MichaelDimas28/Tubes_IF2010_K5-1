@@ -38,6 +38,7 @@ public class UI {
     public boolean confirmingPurchase = false;
     public String quantityInput = "";
     public boolean confirmYes = true;
+    public boolean confirmSleep = true;
 
     public boolean fishingActive = false;
     public boolean fishingGuessing = false;
@@ -100,6 +101,10 @@ public class UI {
 
         if (gp.tvOn) {
             drawTVText();
+        }
+
+        if (gp.sleepMenuOn) {
+            drawSleepMenu();
         }
 
         if (messageOn) {
@@ -330,6 +335,36 @@ public class UI {
             }
         }
     }
+
+    public void drawSleepMenu() {
+        int frameX = gp.tileSize;
+        int frameY = gp.screenHeight - gp.tileSize * 4 + 10;
+        int width = gp.screenWidth - (gp.tileSize * 2);
+        int height = gp.tileSize * 3;
+        drawSubWindow(frameX, frameY, width, height);
+
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 24F));
+        int textX = frameX + gp.tileSize / 2;
+        int textY = frameY + gp.tileSize / 2;
+
+        int maxWidth = width - gp.tileSize;
+        drawWrappedText("Apakah Anda ingin tidur?", textX, textY+20, maxWidth);
+
+        // Gambar pilihan YA / TIDAK
+        g2.setColor(confirmSleep ? Color.YELLOW : Color.WHITE);
+        g2.drawString("YA", textX, textY + 60);
+
+        g2.setColor(!confirmSleep ? Color.YELLOW : Color.WHITE);
+        g2.drawString("TIDAK", textX + 100, textY + 60);
+    }
+
+    public void processSleep() {
+        gp.sleepMenuOn = false;
+        gp.farm.nextDay(); // ganti hari
+        gp.farm.getTime().setTime(6, 0);
+        showMessage("Hari telah berganti!");
+    }
+
 
     public void drawTVText() {
         int frameX = gp.tileSize;

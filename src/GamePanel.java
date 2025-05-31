@@ -48,6 +48,7 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean inventoryOpen = false;
     public boolean binOpen = false;
     public boolean tvOn = false;
+    public boolean sleepMenuOn = false;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -58,7 +59,7 @@ public class GamePanel extends JPanel implements Runnable {
         gameClockTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!gamePaused && !inventoryOpen && !dialogueOn && !binOpen && !!tvOn) { // Tambahkan kondisi jika game bisa pause
+            if (!gamePaused && !inventoryOpen && !dialogueOn && !binOpen && !tvOn && !sleepMenuOn) { // Tambahkan kondisi jika game bisa pause
                 farm.getTime().skipTime(5, farm); // Tambah 5 menit per 1 detik
             } else {
                 farm.getTime().skipTime(0, farm); // Waktu berhenti ketika membuka inventory dan pause dan berbicara dengan NPC
@@ -102,7 +103,7 @@ public class GamePanel extends JPanel implements Runnable {
             keyH.iPressed = false;
         }
 
-        if (!gamePaused && !inventoryOpen && !binOpen && !tvOn) {
+        if (!gamePaused && !inventoryOpen && !binOpen && !tvOn && !sleepMenuOn) {
             player.update();
         }
     }

@@ -47,6 +47,8 @@ public class Farm {
     // }
 
     public void nextDay() {
+        // day++;
+        processNewDay();
         for (int row = 0; row < 32; row++) {
             for (int col = 0; col < 32; col++) {
                 FarmTile tile = getTileAt(col, row);
@@ -67,8 +69,8 @@ public class Farm {
         } else {
             gp.player.setEnergy(gp.player.getEnergy()+(gp.player.MAX_ENERGY));
         }
-
-        if (getWeatherForTomorrow().equals(Weather.Rainy)) {
+        
+        if (getWeather().equals(Weather.Rainy)) {
             for (int row = 0; row < 32; row++) {
                 for (int col = 0; col < 32; col++) {
                     FarmTile tile = getTileAt(col, row);

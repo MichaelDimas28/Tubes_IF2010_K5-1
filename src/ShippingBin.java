@@ -31,7 +31,7 @@ public class ShippingBin {
     public int calculatePrice() {
         int total = 0;
         for (InventoryItem item : shippedItems) {
-            total += item.getItem().getSellPrice();
+            total += item.getItem().getSellPrice()*item.getQuantity();
         }
         return total;
     }

@@ -248,6 +248,20 @@ public class KeyHandler implements KeyListener{
             return;
         }
 
+        if (gp.sleepMenuOn) {
+            if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT || code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+                gp.ui.confirmSleep = !gp.ui.confirmSleep;
+            } else if (code == KeyEvent.VK_ENTER) {
+                if (gp.ui.confirmSleep) {
+                    gp.ui.processSleep();
+                } else {
+                    gp.sleepMenuOn = false;
+                }
+            }
+            return; // blokir input lain saat sleep menu aktif
+        }
+
+
         if (gp.inventoryOpen) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
                 gp.ui.slotRow--;
@@ -304,6 +318,9 @@ public class KeyHandler implements KeyListener{
             }
             if (tileName != null && Arrays.asList("468.png", "469.png").contains(tileName)) {
                 gp.tvOn = true;
+            }
+            if (tileName != null && Arrays.asList("301.png","302.png","303.png","304.png","305.png","306.png").contains(tileName)) {
+                gp.sleepMenuOn = true;
             }
             spacePressed = true;
         }

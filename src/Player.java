@@ -374,7 +374,7 @@ public class Player implements Action {
                 } else {
                     gp.ui.showMessage("Tidak dapat menanam benih!");
                 }
-            } else if (itemHeld == null && targetTile.getPlantState() == PlantState.HARVEST) {
+            } else if (itemHeld == null && targetTile.getPlantState() == PlantState.HARVEST && keyH.enterPressed) {
                 if (targetTile.getSeed() != null) {
                     Crops crop = targetTile.getSeed().getResultItem(gp.itemManager);
                     inventory.addItem(new InventoryItem(crop, crop.getHarvestAmount()));
@@ -382,6 +382,7 @@ public class Player implements Action {
                     energy -= 5;
                     gp.farm.getTime().skipTime(5, null);
                     keyH.enterPressed = false;
+                    gp.ui.showMessage("Anda berhasil memanen"+crop.getItemName());
                 }
             }   else {
                 standCounter++;
