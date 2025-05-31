@@ -163,6 +163,62 @@ import java.util.Map;
         }
     }
 
+    public int getFrontTileID() { // Metode baru atau modifikasi getFrontTile
+        int tileX = gp.player.worldX / gp.tileSize;
+        int tileY = gp.player.worldY / gp.tileSize;
+        int playerDirectionX = 0;
+        int playerDirectionY = 0;
+
+        switch (gp.player.direction) {
+            case "up":
+                tileY -= 1;
+                playerDirectionY = -1;
+                break;
+            case "down":
+                tileY += 1;
+                playerDirectionY = 1;
+                break;
+            case "left":
+                tileX -= 1;
+                playerDirectionX = -1;
+                break;
+            case "right":
+                tileX += 1;
+                playerDirectionX = 1;
+                break;
+        }
+
+        // Boundary checks (penting agar tidak error ArrayOutOfBounds)
+        if (tileX >= 0 && tileX < gp.maxWorldCol && tileY >= 0 && tileY < gp.maxWorldRow) {
+            // Pastikan gp.currentMap sudah benar dan mapTileNum[gp.currentMap] terisi
+            if (gp.currentMap >= 0 && gp.currentMap < mapTileNum.length &&
+                mapTileNum[gp.currentMap] != null &&
+                tileX < mapTileNum[gp.currentMap].length &&
+                mapTileNum[gp.currentMap][tileX] != null &&
+                tileY < mapTileNum[gp.currentMap][tileX].length) {
+                return mapTileNum[gp.currentMap][tileX][tileY];
+            }
+        }
+        return -1; // Mengembalikan nilai invalid jika di luar batas atau error
+    }
+
+
+    public int getTileIDAtPlayerPosition() {
+        int tileX = gp.player.worldX / gp.tileSize;
+        int tileY = gp.player.worldY / gp.tileSize;
+
+        if (tileX >= 0 && tileX < gp.maxWorldCol && tileY >= 0 && tileY < gp.maxWorldRow) {
+            if (gp.currentMap >= 0 && gp.currentMap < mapTileNum.length &&
+                mapTileNum[gp.currentMap] != null &&
+                tileX < mapTileNum[gp.currentMap].length &&
+                mapTileNum[gp.currentMap][tileX] != null &&
+                tileY < mapTileNum[gp.currentMap][tileX].length) {
+                return mapTileNum[gp.currentMap][tileX][tileY];
+            }
+        }
+        return -1;
+    }
+
     public void loadMap(String mapFile, int map, int colSize, int rowSize) {
         mapCols[map] = colSize;
         mapRows[map] = rowSize;
