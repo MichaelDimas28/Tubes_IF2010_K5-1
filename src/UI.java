@@ -29,6 +29,10 @@ public class UI {
     public int slotCol = 0;
     public int slotRow = 0;
 
+    public boolean endGameStatsOn = false;
+    public boolean objectivesVisible = false;
+    public List<String> endGameLines = new ArrayList<>();
+
     private Farm farm;
 
     public Map<String, List<String>> npcDialogues = new HashMap<>();
@@ -107,6 +111,14 @@ public class UI {
         //     drawFarm(g2);
         // }
 
+        // if (objectivesVisible) {
+        //     showObjectives();
+        //     return;
+        // }
+        if (endGameStatsOn) {
+            drawEndGameStats(g2);
+            return;
+        }
         drawPlayerStats(g2);
         drawTimeWindow(g2);
         drawItemHeld();
@@ -939,6 +951,115 @@ public class UI {
         }
         return new ArrayList<>();
 }
+
+public void prepareEndGameStats(Player player, NPCManager npcManager) {
+    endGameLines.clear();
+
+    int totalSeasons = player.gp.farm.getSeason().ordinal() + 1;
+    int daysPlayed = player.gp.farm.getDay();
+
+    // Bagian statistik
+    endGameLines.add("=== END GAME STATISTICS ===");
+    endGameLines.add("Total Income: " + player.getTotalIncome() + "g");
+    endGameLines.add("Total Expenditure: " + player.getTotalExpenditure() + "g");
+    endGameLines.add("Avg Season Income: " + (player.getTotalIncome() / totalSeasons) + "g");
+    endGameLines.add("Avg Season Expenditure: " + (player.getTotalExpenditure() / totalSeasons) + "g");
+    endGameLines.add("Total Days Played: " + daysPlayed);
+    endGameLines.add("Crops Harvested: " + player.getCropsHarvested());
+    endGameLines.add("Fish Caught: " + player.getFishCaught());
+    endGameLines.add(" ");
+
+    // Bagian NPC
+    endGameLines.add("== NPC Relationship ==");
+
+    List<String> left = new ArrayList<>();
+    List<String> right = new ArrayList<>();
+    int counter = 0;
+
+    for (int i = 0; i < npcManager.npcMapList.length; i++) {
+        for (int j = 0; j < npcManager.npcMapList[i].size(); j++) {
+            String nameLine = npcManager.npcMapList[i].get(j).getName() + ": " + npcManager.npcMapList[i].get(j).getRelationshipStatus();
+            String statsLine = String.format("Chat: %d, Gift: %d, Visit: %d",
+                    npcManager.npcMapList[i].get(j).getFreqChat(),
+                    npcManager.npcMapList[i].get(j).getFreqGift(),
+                    npcManager.npcMapList[i].get(j).getFreqVisit());
+
+            String fullLine = nameLine + "  " + statsLine;
+
+            if (counter % 2 == 0) {
+                left.add(fullLine);
+            } else {
+                right.add(fullLine);
+            }
+            counter++;
+        }
+    }
+
+    // Gabungkan 2 kolom jadi 1 list
+    int max = Math.max(left.size(), right.size());
+    for (int i = 0; i < max; i++) {
+        String l = i < left.size() ? left.get(i) : "";
+        String r = i < right.size() ? right.get(i) : "";
+        endGameLines.add(String.format("%-28s  %s", l, r));
+    }
+}
+
+
+
+    public void drawEndGameStats(Graphics2D g2) {
+    int x = gp.tileSize;
+    int y = gp.tileSize;
+    int width = gp.screenWidth - 2 * gp.tileSize;
+    int height = gp.screenHeight - 2 * gp.tileSize;
+
+    drawSubWindow(x, y, width, height);
+    g2.setFont(new Font("Arial", Font.PLAIN, 16));
+    g2.setColor(Color.white);
+
+    int lineHeight = 22;
+    int lineY = y + gp.tileSize;
+
+    for (String line : endGameLines) {
+        if (line.trim().isEmpty() || line.trim().startsWith("=")) {
+            // Rata tengah judul
+            int stringWidth = g2.getFontMetrics().stringWidth(line);
+            int centerX = x + (width - stringWidth) / 2;
+            g2.drawString(line, centerX, lineY);
+        } else if (line.contains("  ")) {
+            // Dua kolom NPC kiri-kanan
+            String[] parts = line.split("  ", 2);
+            g2.drawString(parts[0], x + 40, lineY); // kiri
+            g2.drawString(parts[1], x + width / 2, lineY); // kanan
+        } else {
+            // Statistik biasa
+            g2.drawString(line, x + 60, lineY);
+        }
+        lineY += lineHeight;
+    }
+
+    g2.setColor(Color.yellow);
+    g2.drawString("Tekan ENTER untuk keluar", x + 60, lineY + 30);
+}
+
+
+
+    public void showObjectives() {
+        int frameX = gp.tileSize;
+        int frameY = gp.tileSize;
+        int width = gp.screenWidth - (gp.tileSize*2);
+        int height = gp.tileSize*3;
+        drawSubWindow(frameX, frameY, width, height);
+
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 24F));
+        g2.setColor(Color.white);
+        int textX = frameX + gp.tileSize / 2;
+        int textY = frameY + gp.tileSize;
+
+        int maxWidth = width - gp.tileSize;
+        drawWrappedText("Objektif!", textX, textY-10, maxWidth);
+        drawWrappedText("1. Raih Gold sebesar 17.209g!", textX, textY+25, maxWidth);
+        drawWrappedText("2. Menikahlah dengan seorang NPC!", textX, textY+60, maxWidth);
+    }
 
     public void loadDialogues() {
         npcDialogues.put("Emily", List.of(
