@@ -31,7 +31,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int worldHeight = tileSize * maxWorldRow;
     
     Timer gameClockTimer;
-    Farm farm = new Farm(Weather.Sunny, 1, Season.Spring, new Time(6, 0), new ShippingBin());
+    Farm farm = new Farm(this, Weather.Sunny, 1, Season.Spring, new Time(6, 0), new ShippingBin());
     TileManager tileM = new TileManager(this);
     KeyHandler keyH = new KeyHandler(this);
     UI ui = new UI(this, this.farm);
@@ -126,6 +126,7 @@ public class GamePanel extends JPanel implements Runnable {
 
 
         tileM.draw(g2);
+        farm.drawFarm(g2);
 
         
         player.draw(g2);

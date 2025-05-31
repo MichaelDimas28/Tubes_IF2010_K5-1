@@ -1,7 +1,10 @@
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class Farm {
     // private String farmName;
+    private GamePanel gp;
     private int day = 1;
     private Season season = Season.Spring;
     private Weather weather = Weather.Sunny;
@@ -12,8 +15,10 @@ public class Farm {
     private Random randomGenerator = new Random();
     private int rainyDaysThisSeason = 0;
     private Weather weatherForTomorrow; 
+    private FarmTile[][] tiles;
 
-    Farm (Weather weather, int day, Season season, Time time, ShippingBin shippingBin) {
+    Farm (GamePanel gp, Weather weather, int day, Season season, Time time, ShippingBin shippingBin) {
+        this.gp = gp;
         this.weather = weather;
         this.day = day;
         this.season = season;
@@ -25,6 +30,16 @@ public class Farm {
             this.rainyDaysThisSeason = 1;
         }
         determineWeatherForTomorrow(); 
+        tiles = new FarmTile[32][32];
+        for (int i = 0; i < 32; i++) {
+            for (int j = 0; j<32 ; j++) {
+                tiles[i][j] = new FarmTile();
+            }
+        }
+    }
+
+    public FarmTile getTileAt(int col, int row) {
+        return tiles[col][row];
     }
 
     // public void setFarmName(String newName) {
@@ -32,7 +47,66 @@ public class Farm {
     // }
 
     public void nextDay() {
-        day++;
+        for (int row = 0; row < 32; row++) {
+            for (int col = 0; col < 32; col++) {
+                FarmTile tile = getTileAt(col, row);
+                if (tile.getSoilState() == SoilState.WATERED) {
+                    tile.water(); // lakukan grow + update state
+                }
+            }
+        }
+    }
+
+//     public void draw(Graphics2D g2) {
+//     for (int row = 0; row < tiles.length; row++) {
+//         for (int col = 0; col < tiles[0].length; col++) {
+//             Tile tile = tiles[row][col];
+//             if (tile != null) {
+//                 g2.drawImage(tile.getImage(), col * 48, row * 48, null);
+//             }
+//         }
+//     }
+// }
+    public void drawFarm(Graphics2D g2) {
+        if (gp.currentMap != 0) return;
+
+        for (int row = 0; row < 32; row++) {
+            for (int col = 0; col < 32; col++) {
+                FarmTile tile = getTileAt(col, row);
+
+                int worldX = col * gp.tileSize;
+                int worldY = row * gp.tileSize;
+                int screenX = worldX - gp.player.worldX + gp.player.screenX;
+                int screenY = worldY - gp.player.worldY + gp.player.screenY;
+
+                // Cek apakah tile ada dalam layar
+                if (screenX + gp.tileSize > 0 && screenX < gp.screenWidth &&
+                    screenY + gp.tileSize > 0 && screenY < gp.screenHeight) {
+
+                    switch (tile.getSoilState()) {
+                        case LAND -> {} // default tile
+                        case TILLED -> g2.drawImage(gp.tileM.tilledTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                        case WATERED -> g2.drawImage(gp.tileM.wateredTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                    }
+
+                    switch (tile.getPlantState()) {
+                        case PLANTED, HARVEST -> {
+                            // g2.drawImage(gp.tileM.tilledTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                            int growth = tile.getGrowthDays();
+                            int required = tile.getRequiredDays();
+
+                            BufferedImage cropImg = gp.tileM.crop1;
+                            if (growth == 0) cropImg = gp.tileM.crop1;
+                            else if (growth < required) cropImg = gp.tileM.crop2;
+                            else cropImg = gp.tileM.crop3;
+
+                            g2.drawImage(cropImg, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                        }
+                        case NONE -> {}
+                    } 
+                }
+            }
+        }
     }
 
     public void updateWeather (Weather weather) {

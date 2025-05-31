@@ -1,6 +1,6 @@
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-// import java.io.IO;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,10 +19,29 @@ import java.util.Map;
         public Map<Integer, Tile> tileMap = new HashMap<>();
         
         ArrayList<String> fileNames = new ArrayList<>();
-    ArrayList<String> collisionStatus = new ArrayList<>();
+        ArrayList<String> collisionStatus = new ArrayList<>();
+        
+        public BufferedImage tilledTile;
+        public BufferedImage wateredTile;
+        
+        public BufferedImage crop1;
+        public BufferedImage crop2;
+        public BufferedImage crop3;
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
+
+        // Membaca asset tanah Tilled dan Watered
+        try {
+            tilledTile = ImageIO.read(getClass().getResourceAsStream("/tiles/291.png"));
+            wateredTile = ImageIO.read(getClass().getResourceAsStream("/tiles/292.png"));
+
+            crop1 = ImageIO.read(getClass().getResourceAsStream("/objects/crop_1.png"));
+            crop2 = ImageIO.read(getClass().getResourceAsStream("/objects/crop_3.png"));
+            crop3 = ImageIO.read(getClass().getResourceAsStream("/objects/crop_5.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // untuk membaca tiledata.txt
         InputStream is = getClass().getResourceAsStream("/maps/tiledata.txt");
@@ -134,6 +153,8 @@ import java.util.Map;
                 break;
         }
 
+    
+
     if (tileX >= 0 && tileX < gp.maxWorldCol && tileY >= 0 && tileY < gp.maxWorldRow) {
         int tileIndex = mapTileNum[gp.currentMap][tileX][tileY];
             return gp.tileM.tileMap.get(tileIndex).getImageName();
@@ -141,8 +162,6 @@ import java.util.Map;
             return null; // di luar batas map
         }
     }
-
-
 
     public void loadMap(String mapFile, int map, int colSize, int rowSize) {
         mapCols[map] = colSize;

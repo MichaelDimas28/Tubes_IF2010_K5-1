@@ -61,6 +61,9 @@ public class Player implements Action {
     private int total_days_played = 0;
     private int crops_harvested = 0;
     private int fish_caught = 0;
+    private int tileCol;
+    private int tileRow;
+    FarmTile targetTile;
     private Coordinate coordinate = new Coordinate(0,0);
     private Inventory inventory = new Inventory();
     // public final int maxInventorySize = 60;
@@ -80,11 +83,11 @@ public class Player implements Action {
         screenX = gp.screenWidth/2 - (gp.tileSize/2);
         screenY = gp.screenHeight/2 - (gp.tileSize/2);
         
-        solidArea = new Rectangle();
-        solidArea.x = 1;
-        solidArea.y = 1;
-        solidArea.width = 46;
-        solidArea.height = 46;
+        solidArea = new Rectangle(1, 1, 46, 46);
+        // solidArea.x = 1;
+        // solidArea.y = 1;
+        // solidArea.width = 46;
+        // solidArea.height = 46;
         
         setDefaultValues(gp.tileSize*14, gp.tileSize*15, "down");
         getPlayerImage();
@@ -150,12 +153,12 @@ public class Player implements Action {
         waterRight1 = setup("char_watering_right_1.png", gp.tileSize*2, gp.tileSize);
         waterRight2 = setup("char_watering_right_2.png", gp.tileSize*2, gp.tileSize);
     }
-
+    
     public BufferedImage setup(String imageName, int width, int height) {
         UtilityTool uTool = new UtilityTool();
-
+        
         BufferedImage image = null;
-
+        
         try {
             image = ImageIO.read(getClass().getResourceAsStream("/player/"+imageName));
             image = uTool.scaleImage(image, width, height);
@@ -164,7 +167,7 @@ public class Player implements Action {
         }
         return image;
     }
-
+    
     public void setItems() {
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Watering Can"), 1));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Hoe"), 1));
@@ -173,15 +176,39 @@ public class Player implements Action {
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip Seeds"), 15));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip"), 10));
     }
-
+    
     public void update() {
+        tileCol = (worldX + solidArea.x) / gp.tileSize;
+        tileRow = (worldY + solidArea.y) / gp.tileSize;
+        switch (direction) {
+            case "up":
+            tileRow -= 1;
+            // if (tileCol)
+            break;
+            case "down":
+            tileRow += 1;
+            break;
+            case "left":
+            tileCol -= 1;
+            break;
+            case "right":
+            tileCol += 1;
+            break;
+        }
+        targetTile = gp.farm.getTileAt(tileCol, tileRow);
+        
+        if (targetTile == null) {
+            gp.ui.showMessage("Tidak dapat menggunakan item di luar batas lahan!");
+            keyH.enterPressed = false;
+            return;
+        }
         if (gp.dialogueOn) {
             return;
         }
 
         if (tilling) {
             tilling();
-            tile();
+            // tile();
         }
         if (!canTill) {
             tillCooldownCounter++;
@@ -193,7 +220,7 @@ public class Player implements Action {
 
         if (recoverLand) {
             tilling();
-            recoverLand();
+            // recoverLand();
         }
         if (!canTill) {
             tillCooldownCounter++;
@@ -205,7 +232,7 @@ public class Player implements Action {
 
         if (watering) {
             watering();
-            water();
+            // water();
         }
         if (!canWater) {
             waterCooldownCounter++;
@@ -266,7 +293,10 @@ public class Player implements Action {
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else if (tileName != null && Arrays.asList("210.png").contains(tileName)) {
+                } else if (tileName != null && Arrays.asList("210.png").contains(tileName) && targetTile.getSoilState().equals(SoilState.LAND)) {
+                    targetTile.setSoilState(SoilState.TILLED);
+                    energy -= 5;
+                    gp.farm.getTime().skipTime(5, null);
                     tilling = true;
                     canTill = false;
                     keyH.enterPressed = false;
@@ -278,7 +308,11 @@ public class Player implements Action {
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
+                // } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
+                } else if (tileName != null && targetTile.getSoilState().equals(SoilState.TILLED)) {
+                    targetTile.setSoilState(SoilState.WATERED);
+                    energy -= 5;
+                    gp.farm.getTime().skipTime(5, null);
                     watering = true;
                     canWater = false;
                     keyH.enterPressed = false;
@@ -304,15 +338,51 @@ public class Player implements Action {
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
+                // } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
+                } else if (tileName != null && targetTile.getSoilState().equals(SoilState.TILLED)) {
+                    targetTile.reset();
+                    energy -= 5;
+                    gp.farm.getTime().skipTime(5, null);
                     tilling = true;
                     canTill = false;
                     keyH.enterPressed = false;
                 } else {
                     gp.ui.showMessage("Tidak dapat recover land!");
                 }
-            }
-            else {
+            } else if (itemHeld != null && keyH.enterPressed && (targetTile.getSoilState() == SoilState.TILLED||targetTile.getSoilState().equals(SoilState.WATERED)) && itemHeld instanceof Seeds && !tilling && !fishing && !watering && !recoverLand) {
+                String tileName = gp.tileM.getFrontTile();
+                if (gp.currentMap != 0) {
+                    forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
+                    gp.ui.showMessage(forbiddenMessage);
+                // } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
+                } else if (tileName != null && (targetTile.getSoilState().equals(SoilState.TILLED)|| targetTile.getSoilState().equals(SoilState.WATERED))) {
+                    if (targetTile.getSeed() == null) {
+                        Seeds seed = (Seeds) itemHeld;
+                        if (seed.getSeasonGrow() == gp.farm.getSeason()) {
+                            targetTile.plantSeed(seed);
+                            inventory.reduceItem(seed, 1);
+                            energy -= 5;
+                            gp.farm.getTime().skipTime(5, null);
+                            keyH.enterPressed = false;
+                        } else {
+                            gp.ui.showMessage("Benih ini tidak bisa tumbuh di musim ini!");
+                        }
+                    } else {
+                        gp.ui.showMessage("Sudah ada benih ditanam di sini!");
+                    }
+                } else {
+                    gp.ui.showMessage("Tidak dapat menanam benih!");
+                }
+            } else if (itemHeld == null && targetTile.getPlantState() == PlantState.HARVEST) {
+                if (targetTile.getSeed() != null) {
+                    Crops crop = targetTile.getSeed().getResultItem(gp.itemManager);
+                    inventory.addItem(new InventoryItem(crop, crop.getHarvestAmount()));
+                    targetTile.reset();
+                    energy -= 5;
+                    gp.farm.getTime().skipTime(5, null);
+                    keyH.enterPressed = false;
+                }
+            }   else {
                 standCounter++;
                 if (standCounter == 20) {
                     spriteNum = 1;
@@ -1150,4 +1220,22 @@ public class Player implements Action {
 
         setEnergy(getEnergy() - 5);
     }
+
+    // private FarmTile getTileInFront() {
+    // int frontCol = tileCol;
+    // int frontRow = tileRow;
+
+    // switch (direction) {
+    //     case "up": frontRow--; break;
+    //     case "down": frontRow++; break;
+    //     case "left": frontCol--; break;
+    //     case "right": frontCol++; break;
+    // }
+
+    // // Cegah index -1 atau melebihi batas
+    // if (gp.farm.isValidTile(frontCol, frontRow)) {
+    //     return gp.farm.getTileAt(frontCol, frontRow);
+    // } else {
+    //     return null; // tile tidak valid
+    // }
 }

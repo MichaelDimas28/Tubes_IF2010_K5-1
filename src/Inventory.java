@@ -19,6 +19,10 @@ public class Inventory {
         // Jika item belum ada, tambahkan ke list
         items.add(newItem);
     }
+    
+    public void reduceItem(InventoryItem item) {
+        item.setQuantity(item.getQuantity()-1);
+    }
 
 
     public void removeItem(InventoryItem item) {
@@ -36,4 +40,18 @@ public class Inventory {
     public int totalItems() {
         return items.size();
     }
+
+    public boolean reduceItem(Items item, int amount) {
+        for (InventoryItem invItem : items) {
+            if (invItem.getItem().equals(item)) {
+                invItem.setQuantity(invItem.getQuantity() - amount);
+                if (invItem.getQuantity() <= 0) {
+                    items.remove(invItem);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

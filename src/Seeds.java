@@ -18,6 +18,18 @@ public class Seeds extends Items{
         return daysToHarvest;
     }
 
+    public Crops getResultItem(ItemManager itemManager) {
+        // Hilangkan spasi dan kata "Seeds"
+        String resultName = getItemName().replace("Seeds", "").replace("(", "").replace(")", "").trim();
+        resultName = resultName.replaceAll("\\s+", " ").trim();
 
+        Items result = itemManager.getItem(resultName);
+
+        if (result instanceof Crops) {
+            return (Crops) result;
+        } else {
+            return null;
+        }
+    }
 
 }

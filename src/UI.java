@@ -65,6 +65,10 @@ public class UI {
         g2.setFont(arial_40);
         g2.setColor(Color.white);
         
+        // if (gp.currentMap == 0) { // Jika di Farm Map, Draw Kondisi tanah
+        //     drawFarm(g2);
+        // }
+
         drawPlayerStats(g2);
         drawTimeWindow(g2);
         drawItemHeld();
@@ -99,8 +103,8 @@ public class UI {
             int y = 200;
 
             float alpha = 1.0f;
-            if (messageCounter > 90) { // mulai menghilang setelah 90 frame (~1.5 detik)
-                alpha = 1.0f - ((messageCounter - 90) / 30f); // dari 1.0 ke 0.0 selama 30 frame
+            if (messageCounter > 90) { // mulai menghilang setelah 90 frame (1.5 detik)
+                alpha = 1.0f - ((messageCounter - 90) / 30f); // perlahan menghilang
                 if (alpha < 0) alpha = 0;
             }
 
@@ -159,6 +163,54 @@ public class UI {
             return;
         }
     }
+
+    public void drawFarm(Graphics2D g2) {
+        if (gp.currentMap != 0) return;
+
+        for (int row = 0; row < 32; row++) {
+            for (int col = 0; col < 32; col++) {
+                FarmTile tile = gp.farm.getTileAt(col, row);
+
+                int worldX = col * gp.tileSize;
+                int worldY = row * gp.tileSize;
+                int screenX = worldX - gp.player.worldX + gp.player.screenX;
+                int screenY = worldY - gp.player.worldY + gp.player.screenY;
+
+                // Cek apakah tile ada dalam layar
+                if (screenX + gp.tileSize > 0 && screenX < gp.screenWidth &&
+                    screenY + gp.tileSize > 0 && screenY < gp.screenHeight) {
+
+                    switch (tile.getSoilState()) {
+                        case LAND -> {} // default tile
+                        case TILLED -> g2.drawImage(gp.tileM.tilledTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                        case WATERED -> g2.drawImage(gp.tileM.wateredTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                    }
+
+                    switch (tile.getPlantState()) {
+                        case PLANTED, HARVEST -> {
+                            // g2.drawImage(gp.tileM.tilledTile, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                            int growth = tile.getGrowthDays();
+                            int required = tile.getRequiredDays();
+
+                            BufferedImage cropImg = gp.tileM.crop1;
+                            if (growth == 0) cropImg = gp.tileM.crop1;
+                            else if (growth < required) cropImg = gp.tileM.crop2;
+                            else cropImg = gp.tileM.crop3;
+
+                            g2.drawImage(cropImg, screenX, screenY, gp.tileSize, gp.tileSize, null);
+                        }
+                        case NONE -> {}
+                    } 
+                }
+            }
+        }
+    }
+
+
+
+
+
+
 
     public void drawInventory() {
         // FRAME
