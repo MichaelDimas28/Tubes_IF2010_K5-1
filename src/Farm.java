@@ -240,4 +240,21 @@ public class Farm {
         int dayAdjusted = this.day -1; // Jadikan berbasis 0 untuk modulo
         return (dayAdjusted % 10) + 1;
     }
+
+    public void checkPassiveActions(Player player) {
+        if (player.isCooking && player.getRecipeBeingCooked() != null) {
+            // Waktu saat ini di farm
+            int currentFarmDay = this.getDay();
+            int currentFarmTimeInt = this.time.getTimeAsInt();
+
+            // Waktu selesai masak dari player
+            int pCookingCompletionDay = player.getCookingCompletionDay();
+            int pCookingCompletionTimeInt = player.getCookingCompletionTimeAsInt();
+
+            if (currentFarmDay > pCookingCompletionDay ||
+                (currentFarmDay == pCookingCompletionDay && currentFarmTimeInt >= pCookingCompletionTimeInt)) {
+                player.finishCooking();
+            }
+        }
+    }
 }

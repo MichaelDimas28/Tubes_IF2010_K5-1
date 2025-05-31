@@ -51,6 +51,8 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean inventoryOpen = false;
     public boolean binOpen = false;
 
+    public boolean cookingMenuActive = false;
+
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
@@ -60,11 +62,12 @@ public class GamePanel extends JPanel implements Runnable {
         gameClockTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!gamePaused && !inventoryOpen && !dialogueOn) { // Tambahkan kondisi jika game bisa pause
-                farm.getTime().skipTime(5, farm); // Tambah 5 menit per 1 detik
-            } else {
-                farm.getTime().skipTime(0, farm); // Waktu berhenti ketika membuka inventory dan pause dan berbicara dengan NPC
-            }
+            if (!gamePaused && !inventoryOpen && !dialogueOn && !cookingMenuActive) {
+                    farm.getTime().skipTime(5, farm);
+                    farm.checkPassiveActions(player);
+                } else {
+                    farm.getTime().skipTime(0, farm);
+                }
             }
         });
         gameClockTimer.start();
@@ -97,6 +100,13 @@ public class GamePanel extends JPanel implements Runnable {
         if (keyH.pPressed) {
             gamePaused = !gamePaused;
             keyH.pPressed = false;
+            if (gamePaused) {
+                inventoryOpen = false;
+                binOpen = false;
+                cookingMenuActive = false;
+                dialogueOn = false;
+            }
+   
         }
 
         if (keyH.iPressed) {
@@ -104,9 +114,20 @@ public class GamePanel extends JPanel implements Runnable {
             keyH.iPressed = false;
         }
 
-        if (!gamePaused && !inventoryOpen && !binOpen) {
+        if (!gamePaused && !inventoryOpen && !binOpen && !cookingMenuActive && !dialogueOn) {
             player.update();
         }
+
+        
+        if (keyH.iPressed && !gamePaused && !cookingMenuActive && !dialogueOn) {
+            inventoryOpen = !inventoryOpen;
+            keyH.iPressed = false;
+            if (inventoryOpen) {
+                binOpen = false;
+                cookingMenuActive = false;
+                dialogueOn = false;
+        }
+    }
     }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -117,21 +138,25 @@ public class GamePanel extends JPanel implements Runnable {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 48));
             g.drawString("PAUSED", screenWidth / 2 - 100, screenHeight / 2);
-        }
-
-        if (inventoryOpen) {
+        } else if (cookingMenuActive) {
+            g2.setColor(new Color(10, 10, 30, 245));
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            ui.drawCookingMenu(g2);
+        } else if (inventoryOpen) {
             ui.drawInventory();
             ui.drawHeldItemsInventory();
+            tileM.draw(g2);
+            farm.drawFarm(g2);
+            player.draw(g2);
+            npcManager.draw(g2);
+            ui.draw(g2);
+        } else{
+            tileM.draw(g2);
+            farm.drawFarm(g2);
+            player.draw(g2);
+            npcManager.draw(g2);
+            ui.draw(g2);
         }
-
-
-        tileM.draw(g2);
-        farm.drawFarm(g2);
-
-        
-        player.draw(g2);
-        npcManager.draw(g2);
-        ui.draw(g2);
         g2.dispose();
     }
 }

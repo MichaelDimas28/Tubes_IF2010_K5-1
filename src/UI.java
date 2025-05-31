@@ -46,6 +46,11 @@ public class UI {
     public int fishingTriesLeft = 0;
     public Fish currentFishingFish = null;
 
+    public int cookingMenuSelection = 0;
+    public List<Food> availableRecipes = new ArrayList<>();
+    public boolean showRecipeDetails = false;
+    public Food selectedRecipeForDetail = null;
+
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -382,7 +387,13 @@ public class UI {
     }
 
     public void drawSubWindow(int x, int y, int width, int height) {
-        Color bgColor = new Color(0, 0, 0, 180);
+        Color bgColor;
+        if (gp.cookingMenuActive) {
+            bgColor = new Color(30, 30, 50, 235);
+        } else {
+            bgColor = new Color(0, 0, 0, 180);
+        }
+
         Color borderColor = Color.white;
 
         g2.setColor(bgColor);
@@ -391,6 +402,7 @@ public class UI {
         g2.setStroke(new BasicStroke(3));
         g2.setColor(borderColor);
         g2.drawRoundRect(x, y, width, height, 35, 35);
+
     }
 
 
@@ -449,58 +461,129 @@ public class UI {
         }
 
         public void drawEmilyStore(Graphics2D g2) {
-        List<Items> storeItems = getCurrentSeasonStoreItems();
-        int frameX = gp.tileSize;
-        int frameY = gp.tileSize;
-        int width = gp.tileSize * 14;
-        int height = gp.tileSize * 5;
-        drawSubWindow(frameX, frameY, width, height);
+            List<Items> storeItems = getCurrentSeasonStoreItems(); // Ambil item toko musim ini
+            int frameX = gp.tileSize; // Koordinat X frame toko
+            int frameY = gp.tileSize; // Koordinat Y frame toko
+            int width = gp.tileSize * 14; // Lebar frame toko
+            int height = gp.tileSize * 5; // Tinggi frame toko
+            drawSubWindow(frameX, frameY, width, height); // Gambar kotak latar toko
 
-        int slotX = frameX + 20;
-        int slotY = frameY + 20;
-        for (int i = 0; i < storeItems.size(); i++) {
-            int col = i % 13;
-            int row = i / 13;
-            int x = slotX + col * gp.tileSize;
-            int y = slotY + row * gp.tileSize;
-            g2.drawImage(storeItems.get(i).getImage(), x, y, null);
-            if (row == emilyStoreRow && col == emilyStoreCol) {
-                g2.setColor(Color.white);
-                g2.setStroke(new BasicStroke(3));
-                g2.drawRoundRect(x, y, gp.tileSize, gp.tileSize, 10, 10);
+            int slotXStart = frameX + 20;
+            int slotYStart = frameY + 20;
+            int itemsPerRow = 13; // Asumsi dari kode KeyHandler Anda
+
+            for (int i = 0; i < storeItems.size(); i++) {
+                Items itemDiSlotToko = storeItems.get(i);
+                int col = i % itemsPerRow;
+                int row = i / itemsPerRow;
+                int currentSlotX = slotXStart + col * gp.tileSize;
+                int currentSlotY = slotYStart + row * gp.tileSize;
+
+                // Gambar ikon item
+                if (itemDiSlotToko.getImage() != null) {
+                    g2.drawImage(itemDiSlotToko.getImage(), currentSlotX, currentSlotY, gp.tileSize, gp.tileSize, null);
+                }
+
+                String displayName = itemDiSlotToko.getItemName();
+                boolean resepSudahDimiliki = false;
+
+                // Cek apakah ini RecipeItem dan apakah resepnya sudah dimiliki
+                if (itemDiSlotToko instanceof Recipe) {
+                    Recipe recipeItem = (Recipe) itemDiSlotToko;
+                    Items foodToCheck = gp.itemManager.getItem(recipeItem.getUnlocksFoodName());
+                    if (foodToCheck instanceof Food && ((Food) foodToCheck).isRecipeAcquired()) {
+                        resepSudahDimiliki = true;
+                    }
+                }
+
+                // Terapkan style berbeda jika resep sudah dimiliki
+                if (resepSudahDimiliki) {
+                    // Gambar item dengan sedikit redup atau tambahkan overlay
+                    g2.setColor(new Color(100, 100, 100, 150)); // Abu-abu semi-transparan
+                    g2.fillRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize); // Timpa ikon dengan filter abu-abu
+                    // Anda bisa juga menggambar teks "(Dimiliki)" di atasnya, namun mungkin terlalu kecil
+                }
+
+                // Sorot item yang dipilih kursor
+                if (row == emilyStoreRow && col == emilyStoreCol) {
+                    g2.setColor(resepSudahDimiliki ? Color.DARK_GRAY : Color.WHITE); // Kursor abu-abu jika dimiliki, putih jika tidak
+                    g2.setStroke(new BasicStroke(3));
+                    g2.drawRoundRect(currentSlotX, currentSlotY, gp.tileSize, gp.tileSize, 10, 10);
+                }
             }
-        }
 
-        // Deskripsi
-            int index = emilyStoreRow * 13 + emilyStoreCol;
-            if (index < storeItems.size()) {
+            // Deskripsi item yang disorot
+            int index = emilyStoreRow * itemsPerRow + emilyStoreCol;
+            if (index >= 0 && index < storeItems.size()) {
                 Items selected = storeItems.get(index);
-                drawSubWindow(frameX, frameY + height + 10, 280, 50);
-                g2.setColor(Color.white);
+                // Cek lagi apakah resep sudah dimiliki untuk teks deskripsi
+                boolean selectedRecipeIsOwned = false;
+                String originalItemNameForDesc = selected.getItemName();
+                String foodNameToCheckForDesc = "";
+
+                if (selected instanceof Recipe) {
+                    foodNameToCheckForDesc = ((Recipe) selected).getUnlocksFoodName();
+                    Items foodItem = gp.itemManager.getItem(foodNameToCheckForDesc);
+                    if (foodItem instanceof Food && ((Food) foodItem).isRecipeAcquired()) {
+                        selectedRecipeIsOwned = true;
+                    }
+                }
+                
+                String itemDisplayNameForDesc = originalItemNameForDesc;
+                if (selectedRecipeIsOwned) {
+                    itemDisplayNameForDesc += " (Sudah Dimiliki)";
+                }
+
+                drawSubWindow(frameX, frameY + height + 10, 350, 50); // Lebarkan sedikit subwindow deskripsi
+                g2.setColor(Color.WHITE);
                 g2.setFont(arial_40.deriveFont(16f));
-                g2.drawString(selected.getItemName() + " - " + selected.getBuyPrice() + "g", frameX + 20, frameY + height + 40);
+                g2.drawString(itemDisplayNameForDesc + " - " + selected.getBuyPrice() + "g", frameX + 20, frameY + height + 40);
             }
             
+            // ... (sisa UI untuk input jumlah dan konfirmasi pembelian) ...
             // Input jumlah
             if (enteringQuantity) {
-                drawSubWindow(frameX+290, 300, 150, 50);
-                g2.setColor(Color.white);
-                g2.drawString("Jumlah: " + quantityInput, frameX+300, frameY+height+40);
+                // Posisi input jumlah bisa disesuaikan agar tidak tumpang tindih
+                int qtyFrameX = frameX + width + 10; // Sebelah kanan frame toko
+                int qtyFrameY = frameY;
+                if (qtyFrameX + 150 > gp.screenWidth) { // Jika terlalu ke kanan, pindah ke bawah
+                    qtyFrameX = frameX;
+                    qtyFrameY = frameY + height + 10 + 50 + 10; // Di bawah deskripsi
+                }
+                drawSubWindow(qtyFrameX, qtyFrameY, 200, 60); // Perbesar sedikit
+                g2.setColor(Color.WHITE);
+                g2.setFont(arial_40.deriveFont(18f));
+                g2.drawString("Jumlah: " + quantityInput, qtyFrameX + 10, qtyFrameY + 35);
             }
             
             if (confirmingPurchase) {
-                Items selected = storeItems.get(index);
-                drawSubWindow(frameX, frameY+height+70, 250, 150);
-                g2.setColor(Color.white);
-                g2.drawString("Total harga: "+selected.getBuyPrice()*(Integer.parseInt(quantityInput))+"g", frameX+20, frameY+height+100);
-                g2.drawString("Uang anda: "+gp.player.getGold()+"g", frameX+20, frameY+height+130);
-                g2.drawString("Yakin beli?", frameX+20, frameY+height+160);
-                g2.setColor(confirmYes ? Color.YELLOW : Color.white);
-                g2.drawString("YA", frameX+20, frameY+height+190);
-                g2.setColor(!confirmYes ? Color.YELLOW : Color.white);
-                g2.drawString("TIDAK", frameX+80, frameY+height+190);
+                // Posisi konfirmasi bisa disesuaikan
+                int confirmFrameX = frameX + width + 10;
+                int confirmFrameY = frameY + 70; // Di bawah input jumlah (jika di kanan)
+                if (confirmFrameX + 250 > gp.screenWidth) {
+                    confirmFrameX = frameX;
+                    confirmFrameY = frameY + height + 10 + 50 + 10 + 60 + 10; // Di bawah input jumlah
+                }
+                Items itemToConfirm = storeItems.get(emilyStoreRow * itemsPerRow + emilyStoreCol); // Dapatkan item yang dikonfirmasi
+                int finalQty = 0;
+                try {
+                    finalQty = Integer.parseInt(quantityInput);
+                } catch (NumberFormatException e) { /* Biarkan 0 jika error */ }
+
+                drawSubWindow(confirmFrameX, confirmFrameY, 300, 150); // Perbesar sedikit
+                g2.setColor(Color.WHITE);
+                g2.setFont(arial_40.deriveFont(16f));
+                g2.drawString("Beli " + finalQty + " " + itemToConfirm.getItemName() + "?", confirmFrameX + 10, confirmFrameY + 30);
+                g2.drawString("Total harga: " + (itemToConfirm.getBuyPrice() * finalQty) + "g", confirmFrameX + 10, confirmFrameY + 60);
+                g2.drawString("Gold Anda: " + gp.player.getGold() + "g", confirmFrameX + 10, confirmFrameY + 90);
+                
+                g2.setColor(confirmYes ? Color.YELLOW : Color.WHITE);
+                g2.drawString("> YA", confirmFrameX + 10, confirmFrameY + 120);
+                g2.setColor(!confirmYes ? Color.YELLOW : Color.WHITE);
+                g2.drawString("  TIDAK", confirmFrameX + 70, confirmFrameY + 120);
             }
         }
+
 
     public void setEmilyInteractionMode(NPC emily) {
         // tampilkan UI pilihan Talk / Buy (misalnya pakai boolean emilyMenuActive, selectedIndex)
@@ -510,27 +593,78 @@ public class UI {
     }
 
     public void processPurchase() {
-        Items item = getCurrentSeasonStoreItems().get(emilyStoreRow * 13 + emilyStoreCol);
-        int totalCost = item.getBuyPrice() * buyQuantity;
+        List<Items> currentSeasonStoreItems = gp.store.getCurrentSeasonItems();
+    int itemIndexInStore = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol; // Asumsi 13 item per baris
 
-        if (gp.player.getGold() < totalCost) {
-            showMessage("Uang anda kurang!");
-            confirmingPurchase = false;
-            enteringQuantity = false;
-            return;
-        }
+    if (itemIndexInStore < 0 || itemIndexInStore >= currentSeasonStoreItems.size()) {
+        showMessage("Pilihan item tidak valid di toko.");
+        confirmingPurchase = false; enteringQuantity = false; quantityInput = "";
+        return;
+    }
+    Items actualSelectedStoreItem = currentSeasonStoreItems.get(itemIndexInStore);
 
-        gp.player.setGold(gp.player.getGold() - totalCost);
-        if (item.getItemName()=="Wheat Seeds") {
-            gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(item.getItemName()+" ("+gp.farm.getSeason()+")"), buyQuantity));
+    if (actualSelectedStoreItem == null) {
+        showMessage("Tidak ada item yang dipilih.");
+        confirmingPurchase = false; enteringQuantity = false; quantityInput = "";
+        return;
+    }
+    
+    int quantityForThisPurchase;
+    try {
+        quantityForThisPurchase = Integer.parseInt(gp.ui.quantityInput); // Ambil dari input UI
+        if (quantityForThisPurchase <= 0) throw new NumberFormatException();
+    } catch (NumberFormatException e) {
+        showMessage("Jumlah tidak valid.");
+        confirmingPurchase = false; enteringQuantity = true; // Kembali ke input jumlah
+        return;
+    }
+
+
+    // Jika yang dibeli adalah RecipeItem
+    if (actualSelectedStoreItem instanceof Recipe) {
+        Recipe recipeItemPurchased = (Recipe) actualSelectedStoreItem;
+        String foodNameToUnlock = recipeItemPurchased.getUnlocksFoodName();
+        Items foodItemToUnlock = gp.itemManager.getItem(foodNameToUnlock);
+
+        if (foodItemToUnlock instanceof Food) {
+            Food foodRecipe = (Food) foodItemToUnlock;
+            if (foodRecipe.isRecipeAcquired()) {
+                showMessage("Kamu sudah memiliki resep untuk " + foodNameToUnlock + "!");
+                confirmingPurchase = false; enteringQuantity = false; quantityInput = "";
+                return; // Batalkan pembelian
+            }
+
+            // Proses pembelian resep (selalu beli 1)
+            int recipeCost = recipeItemPurchased.getBuyPrice(); // Harga item resep
+            if (gp.player.getGold() >= recipeCost) {
+                gp.player.setGold(gp.player.getGold() - recipeCost);
+                foodRecipe.setRecipeAcquired(true);
+                showMessage("Resep Baru Terbuka: " + foodNameToUnlock + "!");
+                // Item resep tidak ditambahkan ke inventory.
+            } else {
+                showMessage("Gold tidak cukup untuk membeli resep ini!");
+            }
         } else {
-            gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(item.getItemName()), buyQuantity));
+            showMessage("Error: Makanan terkait resep '" + foodNameToUnlock + "' tidak ditemukan atau bukan Food.");
         }
-        showMessage("Terima kasih telah membeli!");
-        confirmingPurchase = false;
-        enteringQuantity = false;
-        emilyStoreActive = false;
-        quantityInput = "";
+    } else {
+        // Pembelian item biasa (bukan RecipeItem)
+        int totalCost = actualSelectedStoreItem.getBuyPrice() * quantityForThisPurchase;
+        if (gp.player.getGold() >= totalCost) {
+            gp.player.setGold(gp.player.getGold() - totalCost);
+            gp.player.getInventory().addItem(new InventoryItem(actualSelectedStoreItem, quantityForThisPurchase));
+            showMessage("Membeli " + quantityForThisPurchase + " " + actualSelectedStoreItem.getItemName() + "!");
+        } else {
+            showMessage("Gold tidak cukup!");
+        }
+    }
+
+    // Reset UI state setelah pembelian (berhasil atau gagal karena gold kurang tapi valid)
+    confirmingPurchase = false;
+    enteringQuantity = false;
+    quantityInput = "";
+    buyQuantity = 0; // Reset gp.ui.buyQuantity juga jika ada
+
     }
 
     public void drawFishingGuessBox(Graphics2D g2) {
@@ -553,7 +687,146 @@ public class UI {
         g2.drawString("ENTER = OK   |   ESC = Cancel", frameX + 20, frameY + 140);
     }
 
+    public void drawCookingMenu(Graphics2D g2) {
+        int menuPadding = gp.tileSize * 2; // Padding dari tepi layar
+        int frameX = menuPadding;
+        int frameY = menuPadding / 2 ; // Lebih ke atas sedikit
+        int frameWidth = gp.screenWidth - (menuPadding * 2);
+        int frameHeight = gp.screenHeight - (menuPadding); // Lebih tinggi
 
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight); // Gambar kotak menu
+
+        g2.setColor(Color.white);
+        g2.setFont(arial_40.deriveFont(28F)); // Font untuk judul
+
+        int lineSpacing = 30;
+        int textPaddingX = frameX + 30; // Padding teks dari tepi kiri kotak menu
+        int currentY = frameY + 50;    // Posisi Y awal untuk teks di dalam kotak menu
+
+        if (!showRecipeDetails) {
+            // TAMPILKAN DAFTAR RESEP
+            String title1 = "Pilih Resep";
+            g2.drawString(title1, textPaddingX, currentY);
+            currentY += lineSpacing - 5;
+
+            g2.setFont(arial_40.deriveFont(20F)); // Font lebih kecil untuk sub-judul
+            String title2 = "(Enter untuk Detail)";
+            g2.drawString(title2, textPaddingX, currentY);
+            currentY += lineSpacing + 10;
+            g2.setFont(arial_40.deriveFont(24F)); // Kembali ke font untuk daftar resep
+
+            if (availableRecipes.isEmpty()) {
+                g2.drawString("Tidak ada resep yang bisa dimasak.", textPaddingX, currentY);
+            } else {
+                for (int i = 0; i < availableRecipes.size(); i++) {
+                    // Pastikan cookingMenuSelection valid
+                    if (cookingMenuSelection < 0 || cookingMenuSelection >= availableRecipes.size()) {
+                        cookingMenuSelection = 0; // Default ke item pertama jika tidak valid
+                        if (availableRecipes.isEmpty()) break; // Keluar jika tetap kosong
+                    }
+
+                    if (i == cookingMenuSelection) {
+                        g2.setColor(Color.yellow);
+                        g2.drawString("> " + availableRecipes.get(i).getItemName(), textPaddingX + 10, currentY + (i * lineSpacing));
+                    } else {
+                        g2.setColor(Color.white);
+                        g2.drawString(availableRecipes.get(i).getItemName(), textPaddingX + 30, currentY + (i * lineSpacing));
+                    }
+                }
+            }
+            g2.setColor(Color.white);
+            g2.setFont(arial_40.deriveFont(20F));
+            g2.drawString("ESC untuk Keluar", textPaddingX, frameY + frameHeight - 30);
+
+        } else {
+            // TAMPILKAN DETAIL RESEP YANG DIPILIH
+            if (selectedRecipeForDetail == null) {
+                showRecipeDetails = false; 
+                return;
+            }
+            g2.setFont(arial_40.deriveFont(28F));
+            g2.drawString("Resep: " + selectedRecipeForDetail.getItemName(), textPaddingX, currentY);
+            currentY += lineSpacing + 15;
+
+            g2.setFont(arial_40.deriveFont(22F)); // Font lebih kecil untuk detail
+
+            // Bahan-bahan
+            g2.drawString("Bahan Dibutuhkan:", textPaddingX, currentY);
+            currentY += lineSpacing;
+            // ... (Logika penggambaran bahan seperti sebelumnya, pastikan posisi Y (currentY) di-update) ...
+            // Contoh untuk satu bahan:
+            // g2.drawString("- " + entry.getKey() + " x" + entry.getValue(), textPaddingX + 20, currentY);
+            // currentY += lineSpacing - 5;
+            Map<String, Integer> requiredIngredientsMap = new HashMap<>();
+            if (selectedRecipeForDetail.getIngredients() != null && !selectedRecipeForDetail.getIngredients().isEmpty()) {
+                for (Items ing : selectedRecipeForDetail.getIngredients()) {
+                    requiredIngredientsMap.put(ing.getItemName(), requiredIngredientsMap.getOrDefault(ing.getItemName(), 0) + 1);
+                }
+                for (Map.Entry<String, Integer> entry : requiredIngredientsMap.entrySet()) {
+                    InventoryItem playerIng = gp.player.getInventory().findItemByName(entry.getKey());
+                    int playerQty = (playerIng == null) ? 0 : playerIng.getQuantity();
+
+                    g2.setColor((playerQty >= entry.getValue()) ? Color.white : Color.red);
+                    g2.drawString("- " + entry.getKey() + " x" + entry.getValue() + " (Punya: " + playerQty + ")", textPaddingX + 20, currentY);
+                    g2.setColor(Color.white); 
+                    currentY += lineSpacing - 5;
+                }
+            } else {
+                g2.drawString("- (Resep ini tidak memiliki bahan!)", textPaddingX + 20, currentY);
+                currentY += lineSpacing -5;
+            }
+            currentY += 15; // Spasi
+
+            // Bahan Bakar
+            g2.drawString("Bahan Bakar Dibutuhkan:", textPaddingX, currentY);
+            currentY += lineSpacing;
+            // ... (Logika penggambaran bahan bakar seperti sebelumnya, update currentY) ...
+            InventoryItem coal = gp.player.getInventory().findItemByName("Coal");
+            InventoryItem firewood = gp.player.getInventory().findItemByName("Firewood");
+            int coalQty = (coal == null) ? 0 : coal.getQuantity();
+            int firewoodQty = (firewood == null) ? 0 : firewood.getQuantity();
+            boolean hasSufficientFuel = false;
+            String fuelStatus = "";
+
+            if (gp.player.isCoalPartiallyUsed()) { 
+                hasSufficientFuel = true;
+                fuelStatus = "- Sisa penggunaan Coal tersedia.";
+            } else if (coalQty > 0) {
+                hasSufficientFuel = true;
+                fuelStatus = "- Coal x1 (Punya: " + coalQty + ")";
+            } else if (firewoodQty > 0) {
+                hasSufficientFuel = true;
+                fuelStatus = "- Firewood x1 (Punya: " + firewoodQty + ")";
+            } else {
+                fuelStatus = "- Tidak ada bahan bakar!";
+            }
+            g2.setColor(hasSufficientFuel ? Color.white : Color.red);
+            g2.drawString(fuelStatus, textPaddingX + 20, currentY);
+            g2.setColor(Color.white);
+            currentY += lineSpacing + 15;
+
+
+            // Opsi Masak / Kembali
+            g2.setFont(arial_40.deriveFont(24F)); // Font untuk opsi
+            String masakText = "Masak";
+            String kembaliText = "Kembali";
+
+            if (cookingMenuSelection == 0) { // 0 untuk "Masak"
+                g2.setColor(Color.yellow);
+                g2.drawString("> " + masakText, textPaddingX + 20, currentY);
+                g2.setColor(Color.white);
+                g2.drawString(kembaliText, textPaddingX + 20, currentY + lineSpacing);
+            } else { // 1 untuk "Kembali"
+                g2.setColor(Color.white);
+                g2.drawString(masakText, textPaddingX + 20, currentY);
+                g2.setColor(Color.yellow);
+                g2.drawString("> " + kembaliText, textPaddingX + 20, currentY + lineSpacing);
+            }
+            g2.setColor(Color.white);
+            g2.setFont(arial_40.deriveFont(20F));
+            g2.drawString("ESC untuk Kembali ke Daftar Resep", textPaddingX, frameY + frameHeight - 30);
+        }
+    }
 
     public List<Items> getCurrentSeasonStoreItems() {
         switch (gp.farm.getSeason()) {
