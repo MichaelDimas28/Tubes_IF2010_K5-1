@@ -53,6 +53,8 @@ public class UI {
     public boolean showRecipeDetails = false;
     public Food selectedRecipeForDetail = null;
 
+    public int mainMenuCommandNum = 0;
+
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -1056,5 +1058,103 @@ public class UI {
             "Di sini susah sinyal banget dah, rasanya pengen pindah desa aja.",
             "Di sini ada event jejepangan gak ya? Udah lama gak nge-event, kapan-kapan adain yuk!"
         ));
+    }
+    public void drawMainMenu(Graphics2D g2) {
+        this.g2 = g2;
+        g2.setColor(new Color(0, 0, 20));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        g2.setFont(arial_80B != null ? arial_80B.deriveFont(70F) : new Font("Arial", Font.BOLD, 70));
+        g2.setColor(Color.YELLOW);
+        String title = "Spakbor Hills";
+        int x = getCenteredX(title);
+        int y = gp.tileSize * 3;
+        g2.drawString(title, x, y);
+
+        g2.setFont(arial_40 != null ? arial_40.deriveFont(40F) : new Font("Arial", Font.PLAIN, 40));
+        int itemY = y + gp.tileSize * 2;
+
+        if (mainMenuCommandNum == 0) {
+            g2.setColor(Color.ORANGE);
+            g2.drawString("> Start Game", getCenteredX("> Start Game"), itemY);
+        } else {
+            g2.setColor(Color.WHITE);
+            g2.drawString("Start Game", getCenteredX("Start Game"), itemY);
+        }
+        itemY += gp.tileSize;
+
+        if (mainMenuCommandNum == 1) {
+            g2.setColor(Color.ORANGE);
+            g2.drawString("> Help", getCenteredX("> Help"), itemY);
+        } else {
+            g2.setColor(Color.WHITE);
+            g2.drawString("Help", getCenteredX("Help"), itemY);
+        }
+        itemY += gp.tileSize;
+
+        if (mainMenuCommandNum == 2) {
+            g2.setColor(Color.ORANGE);
+            g2.drawString("> Exit", getCenteredX("> Exit"), itemY);
+        } else {
+            g2.setColor(Color.WHITE);
+            g2.drawString("Exit", getCenteredX("Exit"), itemY);
+        }
+    }
+
+    public void drawHelpScreen(Graphics2D g2) {
+        this.g2 = g2;
+        g2.setColor(new Color(0, 0, 20));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        g2.setFont(arial_40 != null ? arial_40.deriveFont(30F) : new Font("Arial", Font.PLAIN, 30));
+        g2.setColor(Color.WHITE);
+
+        int x = gp.tileSize;
+        int y = gp.tileSize * 2;
+        int lineHeight = 40;
+
+        g2.drawString("Bantuan Game Spakbor Hills:", x, y);
+        y += lineHeight * 2;
+        g2.setFont(arial_40 != null ? arial_40.deriveFont(20F) : new Font("Arial", Font.PLAIN, 20));
+        g2.drawString("Selamat datang di Spakbor Hills!", x, y);
+        y += lineHeight;
+        g2.drawString("Tujuanmu adalah menjadi petani sukses dan mungkin...", x, y);
+        y += lineHeight;
+        g2.drawString("menemukan cinta sejati di desa ini!", x, y);
+        y += lineHeight * 1.5;
+        g2.drawString("Gunakan W,A,S,D untuk bergerak.", x, y);
+        y += lineHeight;
+        g2.drawString("SPACE untuk berinteraksi dengan objek atau NPC.", x, y);
+        y += lineHeight;
+        g2.drawString("I untuk membuka/menutup inventory.", x, y);
+        y += lineHeight;
+        g2.drawString("ENTER untuk menggunakan alat yang dipegang.", x, y);
+        y += lineHeight;
+        g2.drawString("P untuk pause game.", x, y);
+        y += lineHeight;
+        g2.drawString("C (di rumah, depan kompor) untuk membuka menu masak.", x, y);
+        y += lineHeight * 2;
+        g2.setColor(Color.YELLOW);
+        g2.drawString("Tekan ESC untuk kembali ke Menu Utama.", x, y);
+    }
+
+    public void drawMessage(Graphics2D g2_param) {
+        if (messageOn) {
+            if(g2_param == null && this.g2 != null) g2_param = this.g2;
+            if(g2_param == null) return;
+
+            g2_param.setFont(new Font("Arial", Font.BOLD, 20));
+            float alpha = 1.0f;
+            Composite originalComposite = g2_param.getComposite();
+            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+            g2_param.setComposite(ac);
+
+            g2_param.setColor(Color.BLACK);
+            g2_param.drawString(message, 32, 202);
+            g2_param.setColor(Color.WHITE);
+            g2_param.drawString(message, 30, 200);
+
+            g2_param.setComposite(originalComposite);
+        }
     }
 }
