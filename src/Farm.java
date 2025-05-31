@@ -51,10 +51,37 @@ public class Farm {
             for (int col = 0; col < 32; col++) {
                 FarmTile tile = getTileAt(col, row);
                 if (tile.getSoilState() == SoilState.WATERED) {
-                    tile.water(); // lakukan grow + update state
+                    tile.grow(); // lakukan grow + update state
                 }
             }
         }
+        for (int i=0; i<gp.npcManager.npcs.length; i++) {
+            gp.npcManager.npcs[i].setHasGift(false);
+            gp.npcManager.npcs[i].setHasTalked(false);
+            gp.npcManager.npcs[i].setHasVisited(false);
+        }
+        if (gp.player.getEnergy() <= 0){
+            gp.player.setEnergy(10);
+        } else if (gp.player.getEnergy() <= (10*gp.player.MAX_ENERGY/100)) {
+            gp.player.setEnergy(gp.player.getEnergy()+(gp.player.MAX_ENERGY/2));
+        } else {
+            gp.player.setEnergy(gp.player.getEnergy()+(gp.player.MAX_ENERGY));
+        }
+
+        if (getWeatherForTomorrow().equals(Weather.Rainy)) {
+            for (int row = 0; row < 32; row++) {
+                for (int col = 0; col < 32; col++) {
+                    FarmTile tile = getTileAt(col, row);
+                    if (tile.getSoilState() == SoilState.TILLED) {
+                        tile.setSoilState(SoilState.WATERED);
+                }
+            }
+        }
+
+        gp.player.setGold(gp.player.getGold()+gp.farm.getShippingBin().calculatePrice());
+        gp.farm.getShippingBin().clearShippingBin();
+        
+    }
     }
 
 //     public void draw(Graphics2D g2) {

@@ -66,17 +66,18 @@ public class Player implements Action {
     FarmTile targetTile;
     private Coordinate coordinate = new Coordinate(0,0);
     private Inventory inventory = new Inventory();
+    public final int MAX_ENERGY = 100;
     // public final int maxInventorySize = 60;
     private List<NPC> npcRelationshipStats = new ArrayList<>();
 
     private String forbiddenMessage = "Anda tidak bisa menggunakan item ini di sini";
    
     //Constructor
-    public Player(String name, Gender gender, int energy, int gold, GamePanel gp, KeyHandler keyH){
+    public Player(String name, Gender gender, GamePanel gp, KeyHandler keyH){
         this.name = name;
         this.gender = gender;
-        this.energy = energy;
-        this.gold = gold;
+        energy = MAX_ENERGY;
+        gold = 0;
         this.gp = gp;
         this.keyH = keyH;
         
@@ -928,7 +929,13 @@ public class Player implements Action {
     }
 
     public void setEnergy(int energy){
-        this.energy = energy;
+        if (energy < -20) {
+            this.energy = 0;
+        } else if (energy > 100) {
+            this.energy = 100;
+        } else {
+            this.energy = energy;
+        }
     }
 
     //Gold
