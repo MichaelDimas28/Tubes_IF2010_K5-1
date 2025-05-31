@@ -195,14 +195,17 @@ public class Player implements Action {
         tileRow = (worldY + solidArea.y) / gp.tileSize;
         switch (direction) {
             case "up":
-            tileRow -= 1;
-            // if (tileCol)
+            if (tileRow > 0) {
+                tileRow -= 1;
+            }
             break;
             case "down":
             tileRow += 1;
             break;
             case "left":
-            tileCol -= 1;
+            if (tileCol > 0) {
+                tileCol -= 1;
+            }
             break;
             case "right":
             tileCol += 1;
@@ -294,107 +297,6 @@ public class Player implements Action {
                 gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
 
 
-            } else if (itemHeld != null && (keyH.spacePressed||keyH.fPressed) && !watering && !fishing && !tilling && !gp.dialogueOn && itemHeld.equals(gp.itemManager.getItem("Proposal Ring"))) { // Proposing & Marrying
-                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
-                if (npcIndex != -1) {
-                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
-                    String successPropose = "";
-
-                    if (npc.getRelationshipStatus().equals(RelationshipStatus.Single)) {
-                        if (npc.getHeartPoints() >= 150 && !(gp.player.getGender().equals(npc.getGender()))) {
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(5);
-                            gp.player.setEnergy(gp.player.getEnergy()-10);
-                            npc.proposedToday = true;
-                            npc.setRelationshipStatus(RelationshipStatus.Fiance);
-                            successPropose = npc.getName()+"telah menerima lamaranmu! Selamat!";
-                        } else if (npc.getHeartPoints() < 150 || gp.player.getGender().equals(npc.getGender())) {
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(6);
-                            gp.player.setEnergy(gp.player.getEnergy()-20);
-                            successPropose = npc.getName()+"telah menolak lamaranmu. Sayang sekali.";
-                        }
-                        gp.farm.getTime().skipTime(60, null);
-                        gp.dialogueOn = true;
-                        gp.ui.showMessage("Kamu mencoba melamar "+npc.getName());
-                        gp.ui.showMessage(successPropose);
-                    } else if (npc.getRelationshipStatus().equals(RelationshipStatus.Fiance)) {
-                        if (!npc.proposedToday) {
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(7);
-                            gp.farm.getTime().setTime(22, 0);
-                            npc.setRelationshipStatus(RelationshipStatus.Spouse);
-                            gp.player.setEnergy(gp.player.getEnergy()-80);
-                            gp.dialogueOn = true;
-                            gp.ui.showMessage("Kamu telah menikahi "+npc.getName()+"! Semoga langgeng terus ya!");
-                        } else {
-                            interactWithNPC(npc);
-                        }
-                    }
-                    }
-                    keyH.spacePressed = false;
-                    keyH.fPressed = false;
-                }
-            } else if (itemHeld != null && (keyH.spacePressed||keyH.fPressed) && !watering && !fishing && !tilling && !gp.dialogueOn && !(itemHeld instanceof Equipment) && !(itemHeld.getItemName().equals("Proposal Ring"))) {
-                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
-                if (npcIndex != -1) {
-                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
-                    // Cek apakah NPC menerima item ini
-                    if (!npc.getHasGift()) {
-                        inventory.reduceItem(itemHeld, 1);
-                        // System.out.println(npc.getLovedItems().contains(itemHeld));
-                        // System.out.println(npc.getLikedItems().contains(itemHeld));
-                        // System.out.println(npc.getHatedItems().contains(itemHeld));
-                        if (npc.getLovedItems().contains(itemHeld)) {
-                            npc.setHeartPoints(npc.getHeartPoints()+25);
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(1);
-                        } else if (npc.getLikedItems().contains(itemHeld)) {
-                            npc.setHeartPoints(npc.getHeartPoints()+20);
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(2);
-                        } else if (npc.getHatedItems().contains(itemHeld)) {
-                            npc.setHeartPoints(npc.getHeartPoints()-25);
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(3);
-                        } else {
-                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(4);
-                        }
-                        npc.setHasGift(true);
-                        npc.setFreqGift(npc.getFreqGift()+1);
-                        gp.farm.getTime().skipTime(10, null);
-                        gp.player.setEnergy(gp.player.getEnergy()-10);
-                        gp.dialogueOn = true;
-                        gp.ui.showMessage("Kamu memberikan " + itemHeld.getItemName() + " ke " + npc.getName());
-                    } else {
-                        interactWithNPC(npc);
-                    }
-                    keyH.spacePressed = false;
-                    keyH.fPressed = false;
-                }
-            } else if (itemHeld == null && keyH.spacePressed && !watering && !fishing && !tilling && !gp.dialogueOn) {
-                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
-                if (npcIndex != -1) {
-                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
-                    interactWithNPC(npc);
-                }
-                keyH.spacePressed = false;
-            } else if (itemHeld != null && keyH.enterPressed && (itemHeld instanceof Food || itemHeld instanceof Fish || itemHeld instanceof Crops)) {
-                if (energy < 100) {
-                    inventory.reduceItem(itemHeld, 1); // Kurangi 1 item
-                    gp.farm.getTime().skipTime(5, null);
-                    if (itemHeld instanceof Food) {
-                        Food foodEaten = (Food) itemHeld;
-                        gp.player.setEnergy(gp.player.getEnergy()+foodEaten.getEnergyRestore());
-                        gp.ui.showMessage("Kamu mengonsumsi " + foodEaten.getItemName() + ". Energi +"+foodEaten.getEnergyRestore());
-                    } else if (itemHeld instanceof Fish) {
-                        Fish fishEaten = (Fish)itemHeld;
-                        gp.player.setEnergy(gp.player.getEnergy()+fishEaten.getEnergyRestore());
-                        gp.ui.showMessage("Kamu mengonsumsi " + fishEaten.getItemName() + ". Energi +"+fishEaten.getEnergyRestore());
-                    } else if (itemHeld instanceof Crops) {
-                        Crops cropEaten = (Crops)itemHeld;
-                        gp.player.setEnergy(gp.player.getEnergy()+cropEaten.getEnergyRestore());
-                        gp.ui.showMessage("Kamu mengonsumsi " + cropEaten.getItemName() + ". Energi +"+cropEaten.getEnergyRestore());
-                    }
-                    keyH.enterPressed = false;
-                } else {
-                    gp.ui.showMessage("Energi kamu sudah penuh!");
-                    keyH.enterPressed = false;
-                }
             } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing && !recoverLand) {
                 String tileName = gp.tileM.getFrontTile();
                 if (gp.currentMap != 0) {
@@ -490,7 +392,111 @@ public class Player implements Action {
                     keyH.enterPressed = false;
                     gp.ui.showMessage("Anda berhasil memanen"+crop.getItemName());
                 }
-            }   else {
+            } else if (itemHeld != null && (keyH.spacePressed||keyH.fPressed) && !watering && !fishing && !tilling && !gp.dialogueOn && itemHeld.equals(gp.itemManager.getItem("Proposal Ring"))) { // Proposing & Marrying
+                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
+                if (npcIndex != -1) {
+                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
+                    String successPropose = "";
+
+                    if (npc.getRelationshipStatus().equals(RelationshipStatus.Single)) {
+                        if (npc.getHeartPoints() >= 150 && !(gp.player.getGender().equals(npc.getGender()))) {
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(5);
+                            gp.player.setEnergy(gp.player.getEnergy()-10);
+                            npc.proposedToday = true;
+                            npc.setRelationshipStatus(RelationshipStatus.Fiance);
+                            successPropose = npc.getName()+"telah menerima lamaranmu! Selamat!";
+                        } else if (npc.getHeartPoints() < 150 || gp.player.getGender().equals(npc.getGender())) {
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(6);
+                            gp.player.setEnergy(gp.player.getEnergy()-20);
+                            successPropose = npc.getName()+"telah menolak lamaranmu. Sayang sekali.";
+                        }
+                        gp.farm.getTime().skipTime(60, null);
+                        gp.dialogueOn = true;
+                        gp.ui.showMessage("Kamu mencoba melamar "+npc.getName());
+                        gp.ui.showMessage(successPropose);
+                    } else if (npc.getRelationshipStatus().equals(RelationshipStatus.Fiance)) {
+                        if (!npc.proposedToday) {
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(7);
+                            gp.farm.getTime().setTime(22, 0);
+                            npc.setRelationshipStatus(RelationshipStatus.Spouse);
+                            gp.player.setEnergy(gp.player.getEnergy()-80);
+                            gp.dialogueOn = true;
+                            gp.ui.showMessage("Kamu telah menikahi "+npc.getName()+"! Semoga langgeng terus ya!");
+                        } else {
+                            interactWithNPC(npc);
+                        }
+                    }
+                    }
+                    keyH.spacePressed = false;
+                    keyH.fPressed = false;
+                }
+            } else if (itemHeld != null && (keyH.spacePressed||keyH.fPressed) && !watering && !fishing && !tilling && !gp.dialogueOn && !(itemHeld instanceof Equipment) && !(itemHeld.getItemName().equals("Proposal Ring"))) {
+                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
+                if (npcIndex != -1) {
+                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
+                    // Cek apakah NPC menerima item ini
+                    if (!npc.getHasGift()) {
+                        inventory.reduceItem(itemHeld, 1);
+                        // System.out.println(npc.getLovedItems().contains(itemHeld));
+                        // System.out.println(npc.getLikedItems().contains(itemHeld));
+                        // System.out.println(npc.getHatedItems().contains(itemHeld));
+                        if (npc.getLovedItems().contains(itemHeld)) {
+                            npc.setHeartPoints(npc.getHeartPoints()+25);
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(1);
+                        } else if (npc.getLikedItems().contains(itemHeld)) {
+                            npc.setHeartPoints(npc.getHeartPoints()+20);
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(2);
+                        } else if (npc.getHatedItems().contains(itemHeld)) {
+                            npc.setHeartPoints(npc.getHeartPoints()-25);
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(3);
+                        } else {
+                            gp.ui.currentDialogue = gp.ui.npcDialogues.get(npc.getName()).get(4);
+                        }
+                        npc.setHasGift(true);
+                        npc.setFreqGift(npc.getFreqGift()+1);
+                        gp.farm.getTime().skipTime(10, null);
+                        gp.player.setEnergy(gp.player.getEnergy()-10);
+                        gp.dialogueOn = true;
+                        gp.ui.showMessage("Kamu memberikan " + itemHeld.getItemName() + " ke " + npc.getName());
+                    } else {
+                        interactWithNPC(npc);
+                    }
+                    keyH.spacePressed = false;
+                    keyH.fPressed = false;
+                }
+            } else if (itemHeld == null && keyH.spacePressed && !watering && !fishing && !tilling && !gp.dialogueOn) {
+                int npcIndex = gp.collisionChecker.checkNPC(this, gp.npcManager.npcMapList[gp.currentMap]);
+                if (npcIndex != -1) {
+                    NPC npc = gp.npcManager.npcMapList[gp.currentMap].get(npcIndex);
+                    interactWithNPC(npc);
+                }
+                keyH.spacePressed = false;
+            } else if (itemHeld != null && keyH.enterPressed && (itemHeld instanceof Food || itemHeld instanceof Fish || itemHeld instanceof Crops)) {
+                if (energy < 100) {
+                    inventory.reduceItem(itemHeld, 1); // Kurangi 1 item
+                    if (inventory.getQuantity(itemHeld)<= 0) {
+                        itemHeld = null;
+                    }
+                    gp.farm.getTime().skipTime(5, null);
+                    if (itemHeld instanceof Food) {
+                        Food foodEaten = (Food) itemHeld;
+                        gp.player.setEnergy(gp.player.getEnergy()+foodEaten.getEnergyRestore());
+                        gp.ui.showMessage("Kamu mengonsumsi " + foodEaten.getItemName() + ". Energi +"+foodEaten.getEnergyRestore());
+                    } else if (itemHeld instanceof Fish) {
+                        Fish fishEaten = (Fish)itemHeld;
+                        gp.player.setEnergy(gp.player.getEnergy()+fishEaten.getEnergyRestore());
+                        gp.ui.showMessage("Kamu mengonsumsi " + fishEaten.getItemName() + ". Energi +"+fishEaten.getEnergyRestore());
+                    } else if (itemHeld instanceof Crops) {
+                        Crops cropEaten = (Crops)itemHeld;
+                        gp.player.setEnergy(gp.player.getEnergy()+cropEaten.getEnergyRestore());
+                        gp.ui.showMessage("Kamu mengonsumsi " + cropEaten.getItemName() + ". Energi +"+cropEaten.getEnergyRestore());
+                    }
+                    keyH.enterPressed = false;
+                } else {
+                    gp.ui.showMessage("Energi kamu sudah penuh!");
+                    keyH.enterPressed = false;
+                }
+            } else {
                 standCounter++;
                 if (standCounter == 20) {
                     spriteNum = 1;
@@ -598,6 +604,8 @@ public class Player implements Action {
                 setDefaultValues(30, 1, "down");
                 worldX = 30*gp.tileSize;
                 worldY = 1*gp.tileSize;
+                gp.farm.getTime().skipTime(15, null);
+                gp.player.setEnergy(gp.player.getEnergy()-10);
             }
             if (row==2 && col ==7) {
                 gp.currentMap = 6;
@@ -606,6 +614,12 @@ public class Player implements Action {
                 setDefaultValues(16, 10, "up");
                 worldX = 16*gp.tileSize;
                 worldY = 10*gp.tileSize;
+                if (!gp.npcManager.npcs[4].getHasVisited()) {
+                    gp.npcManager.npcs[4].setFreqVisit(gp.npcManager.npcs[4].getFreqVisit()+1);
+                    gp.npcManager.npcs[4].setHasVisited(true);
+                }
+                gp.farm.getTime().skipTime(15, null);
+                gp.player.setEnergy(gp.player.getEnergy()-10);
             }
             if (row==2 && col == 5) {
                 gp.currentMap = 1;
@@ -614,6 +628,12 @@ public class Player implements Action {
                 setDefaultValues(7, 7, "up");
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
+                if (!gp.npcManager.npcs[0].getHasVisited()) {
+                    gp.npcManager.npcs[0].setFreqVisit(gp.npcManager.npcs[0].getFreqVisit()+1);
+                    gp.npcManager.npcs[0].setHasVisited(true);
+                }
+                gp.farm.getTime().skipTime(15, null);
+                gp.player.setEnergy(gp.player.getEnergy()-10);
             }
             if (row==6 && col == 5) {
                 gp.currentMap = 2;
@@ -622,6 +642,12 @@ public class Player implements Action {
                 setDefaultValues(7, 7, "up");
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
+                if (!gp.npcManager.npcs[1].getHasVisited()) {
+                    gp.npcManager.npcs[1].setFreqVisit(gp.npcManager.npcs[1].getFreqVisit()+1);
+                    gp.npcManager.npcs[1].setHasVisited(true);
+                }
+                gp.farm.getTime().skipTime(15, null);
+                gp.player.setEnergy(gp.player.getEnergy()-10);
             }
             if (row==6 && col == 11) {
                 gp.currentMap = 3;
@@ -630,6 +656,12 @@ public class Player implements Action {
                 setDefaultValues(7, 7, "up");
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
+                if (!gp.npcManager.npcs[2].getHasVisited()) {
+                    gp.npcManager.npcs[2].setFreqVisit(gp.npcManager.npcs[2].getFreqVisit()+1);
+                    gp.npcManager.npcs[2].setHasVisited(true);
+                }
+                gp.farm.getTime().skipTime(15, null);
+                gp.player.setEnergy(gp.player.getEnergy()-10);
             }
             if (row==2 && col == 11) {
                 gp.currentMap = 4;
@@ -638,6 +670,12 @@ public class Player implements Action {
                 setDefaultValues(7, 7, "up");
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
+                if (!gp.npcManager.npcs[3].getHasVisited()) {
+                    gp.npcManager.npcs[3].setFreqVisit(gp.npcManager.npcs[3].getFreqVisit()+1);
+                    gp.npcManager.npcs[3].setHasVisited(true);
+                }
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
             if (row==2 && col == 9) {
                 gp.currentMap = 5;
@@ -646,6 +684,12 @@ public class Player implements Action {
                 setDefaultValues(7, 7, "up");
                 worldX = 7*gp.tileSize;
                 worldY = 7*gp.tileSize;
+                if (!gp.npcManager.npcs[5].getHasVisited()) {
+                    gp.npcManager.npcs[5].setFreqVisit(gp.npcManager.npcs[5].getFreqVisit()+1);
+                    gp.npcManager.npcs[5].setHasVisited(true);
+                }
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
             if (row==2 && col == 13) {
                 gp.currentMap = 12;
@@ -654,6 +698,14 @@ public class Player implements Action {
                 setDefaultValues(11, 22, "up");
                 worldX = 11*gp.tileSize;
                 worldY = 22*gp.tileSize;
+                for (int i=6 ; i<11; i++) {
+                    if (!gp.npcManager.npcs[i].getHasVisited()) {
+                        gp.npcManager.npcs[i].setFreqVisit(gp.npcManager.npcs[i].getFreqVisit()+1);
+                        gp.npcManager.npcs[i].setHasVisited(true);
+                    }
+                }
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
             if (row == 2 && col == 17) { // Mountain Lake
                 gp.currentMap = 9;
@@ -662,6 +714,8 @@ public class Player implements Action {
                 setDefaultValues(9, 1, "down");
                 worldX = 9*gp.tileSize;
                 worldY = 1*gp.tileSize;
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
             if (row == 6 && col == 16) { // Ocean
                 gp.currentMap = 7;
@@ -670,6 +724,8 @@ public class Player implements Action {
                 setDefaultValues(2, 2, "down");
                 worldX = 2*gp.tileSize;
                 worldY = 2*gp.tileSize;
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
             if (row == 4 && col == 2) { // Forest River
                 gp.currentMap = 8;
@@ -678,6 +734,8 @@ public class Player implements Action {
                 setDefaultValues(7, 1, "down");
                 worldX = 7*gp.tileSize;
                 worldY = 1*gp.tileSize;
+                gp.player.setEnergy(gp.player.getEnergy()-10);
+                gp.farm.getTime().skipTime(15, null);
             }
         } else if (gp.currentMap == 6) {
             gp.maxWorldCol = gp.tileM.mapCols[gp.currentMap];

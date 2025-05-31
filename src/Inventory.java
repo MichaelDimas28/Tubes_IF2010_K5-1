@@ -54,6 +54,15 @@ public class Inventory {
         return false;
     }
 
+    public int getQuantity(Items item) {
+        for (InventoryItem invItem : items) {
+            if (invItem.getItem().equals(item)) {
+                return invItem.getQuantity();
+            }
+        }
+        return 0;
+    }
+
     public boolean hasItemByName(String itemName) {
         for (InventoryItem invItem : items) {
             if (invItem.getItem().getItemName().equals(itemName) && invItem.getQuantity() > 0) {
