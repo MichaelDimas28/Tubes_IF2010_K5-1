@@ -2,9 +2,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+
 import java.util.List;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -15,6 +20,7 @@ public class UI {
     GamePanel gp;
     Graphics2D g2;
     Font arial_40, arial_80B;
+    public BufferedImage mainMenuBackdrop;
     public boolean messageOn = false;
     public String message = "";
     int messageCounter = 0;
@@ -57,13 +63,38 @@ public class UI {
     public boolean showRecipeDetails = false;
     public Food selectedRecipeForDetail = null;
 
+    public int mainMenuCommandNum = 0;
+
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
         arial_80B = new Font("Arial", Font.BOLD, 40);
         this.farm = farm;
         loadDialogues();
+        loadResources();
     }
+
+    private void loadResources() {
+        try {
+            // Path harus dimulai dengan "/" jika resource ada di dalam classpath (seperti folder src)
+            // dan nama file harus persis, termasuk ekstensi .jpg
+            InputStream is = getClass().getResourceAsStream("/background/mainmenubackground.png");
+            if (is == null) {
+                mainMenuBackdrop = null; // Set ke null jika gagal
+            } else {
+                mainMenuBackdrop = ImageIO.read(is);
+            }
+        } catch (IOException e) {
+            System.err.println("UI Error: IOException saat memuat mainMenuBackdrop.jpg");
+            mainMenuBackdrop = null; // Set ke null jika gagal
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            System.err.println("UI Error: IllegalArgumentException (kemungkinan path salah atau format tidak didukung) saat memuat mainMenuBackdrop.jpg");
+            mainMenuBackdrop = null; // Set ke null jika gagal
+            e.printStackTrace();
+        }
+    }
+
     
     public void showMessage(String text) {
         message = text;
@@ -1177,5 +1208,130 @@ public void prepareEndGameStats(Player player, NPCManager npcManager) {
             "Di sini susah sinyal banget dah, rasanya pengen pindah desa aja.",
             "Di sini ada event jejepangan gak ya? Udah lama gak nge-event, kapan-kapan adain yuk!"
         ));
+    }
+    public void drawMainMenu(Graphics2D g2_param) { // Terima Graphics2D sebagai parameter
+        this.g2 = g2_param; // Atau gunakan g2_param secara langsung di seluruh metode
+
+        // 1. Gambar Backdrop Terlebih Dahulu
+        if (mainMenuBackdrop != null) {
+            // Gambar backdrop agar memenuhi seluruh layar GamePanel
+            g2_param.drawImage(mainMenuBackdrop, 0, 0, gp.screenWidth, gp.screenHeight, null);
+        } else {
+            // Fallback jika gambar gagal dimuat: Latar belakang warna solid
+            g2_param.setColor(new Color(0, 0, 20)); // Latar belakang biru tua solid
+            g2_param.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+            g2_param.setColor(Color.WHITE);
+            g2_param.drawString("Gagal memuat latar belakang menu utama.", 50, 100);
+        }
+        int yTitle = gp.tileSize * 4; // Sesuaikan posisi Y jika perlu
+        // Opsi Menu
+        Font menuFont = arial_40 != null ? arial_40.deriveFont(Font.BOLD, 40F) : new Font("Arial", Font.BOLD, 40); // Pertebal font menu
+        int itemY = yTitle + gp.tileSize * 3; // Beri jarak lebih dari judul
+        String[] menuItems = {"Start Game", "Help", "Exit"};
+
+        for (int i = 0; i < menuItems.length; i++) {
+            Color textColor = (mainMenuCommandNum == i) ? new Color(255, 160, 0) : Color.WHITE; // Orange untuk pilihan, putih untuk lainnya
+            String text = (mainMenuCommandNum == i) ? "> " + menuItems[i] : "  " + menuItems[i]; // Tambahkan spasi untuk yang tidak dipilih agar rata
+            
+            // Hitung X agar semua item menu rata kiri, bukan di tengah layar masing-masing
+            // int xItem = getCenteredX(menuItems[i], g2_param); // Ini akan membuat setiap baris terpusat sendiri
+            int xItem = gp.tileSize * 4; // Contoh: Posisi X tetap untuk semua item menu (rata kiri)
+
+
+            drawTextWithOutline(g2_param, text, xItem, itemY + (i * (gp.tileSize + 10)), Color.BLACK, textColor, menuFont); // Beri jarak antar item menu
+        }
+    }
+    private void drawTextWithOutline(Graphics2D g2_param, String text, int x, int y, Color outlineColor, Color textColor, Font font) {
+        Font originalFont = g2_param.getFont();
+        g2_param.setFont(font);
+
+        // Gambar outline
+        g2_param.setColor(outlineColor);
+        int thickness = 2; // Ketebalan outline
+        for (int i = -thickness; i <= thickness; i++) {
+            for (int j = -thickness; j <= thickness; j++) {
+                if (i != 0 || j != 0) { // Jangan gambar di posisi teks asli untuk outline
+                    g2_param.drawString(text, x + i, y + j);
+                }
+            }
+        }
+        // Jika ingin outline yang lebih simpel:
+        // g2_param.drawString(text, x - 1, y - 1);
+        // g2_param.drawString(text, x + 1, y - 1);
+        // g2_param.drawString(text, x - 1, y + 1);
+        // g2_param.drawString(text, x + 1, y + 1);
+
+        // Gambar teks utama
+        g2_param.setColor(textColor);
+        g2_param.drawString(text, x, y);
+
+        g2_param.setFont(originalFont); // Kembalikan font asli jika diubah di sini
+    }
+
+    public int getCenteredX(String text, Graphics2D g2_param) {
+        if (g2_param == null) {
+            if (this.g2 != null) g2_param = this.g2;
+            else return 0; // Tidak bisa jika g2 null
+        }
+        if (text == null) return 0;
+        FontMetrics fm = g2_param.getFontMetrics(g2_param.getFont());
+        return (gp.screenWidth - fm.stringWidth(text)) / 2;
+    }
+
+    public void drawHelpScreen(Graphics2D g2) {
+        this.g2 = g2;
+        g2.setColor(new Color(0, 0, 20));
+        g2.fillRect(0, 0, gp.screenWidth, gp.screenHeight);
+
+        g2.setFont(arial_40 != null ? arial_40.deriveFont(30F) : new Font("Arial", Font.PLAIN, 30));
+        g2.setColor(Color.WHITE);
+
+        int x = gp.tileSize;
+        int y = gp.tileSize * 2;
+        int lineHeight = 40;
+
+        g2.drawString("Bantuan Game Spakbor Hills:", x, y);
+        y += lineHeight * 2;
+        g2.setFont(arial_40 != null ? arial_40.deriveFont(20F) : new Font("Arial", Font.PLAIN, 20));
+        g2.drawString("Selamat datang di Spakbor Hills!", x, y);
+        y += lineHeight;
+        g2.drawString("Tujuanmu adalah menjadi petani sukses dan mungkin...", x, y);
+        y += lineHeight;
+        g2.drawString("menemukan cinta sejati di desa ini!", x, y);
+        y += lineHeight * 1.5;
+        g2.drawString("Gunakan W,A,S,D untuk bergerak.", x, y);
+        y += lineHeight;
+        g2.drawString("SPACE untuk berinteraksi dengan objek atau NPC.", x, y);
+        y += lineHeight;
+        g2.drawString("I untuk membuka/menutup inventory.", x, y);
+        y += lineHeight;
+        g2.drawString("ENTER untuk menggunakan alat yang dipegang.", x, y);
+        y += lineHeight;
+        g2.drawString("P untuk pause game.", x, y);
+        y += lineHeight;
+        g2.drawString("C (di rumah, depan kompor) untuk membuka menu masak.", x, y);
+        y += lineHeight * 2;
+        g2.setColor(Color.YELLOW);
+        g2.drawString("Tekan ESC untuk kembali ke Menu Utama.", x, y);
+    }
+
+    public void drawMessage(Graphics2D g2_param) {
+        if (messageOn) {
+            if(g2_param == null && this.g2 != null) g2_param = this.g2;
+            if(g2_param == null) return;
+
+            g2_param.setFont(new Font("Arial", Font.BOLD, 20));
+            float alpha = 1.0f;
+            Composite originalComposite = g2_param.getComposite();
+            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+            g2_param.setComposite(ac);
+
+            g2_param.setColor(Color.BLACK);
+            g2_param.drawString(message, 32, 202);
+            g2_param.setColor(Color.WHITE);
+            g2_param.drawString(message, 30, 200);
+
+            g2_param.setComposite(originalComposite);
+        }
     }
 }
