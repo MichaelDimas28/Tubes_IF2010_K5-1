@@ -31,6 +31,9 @@ Untuk memainkan game ini dibutuhkan
 
 - `W A S D` atau `arrow keys` untuk bergerak
 - `i` untuk inventory
-- `space` untuk action
+- `space` untuk berinterasi dengan benda dan orang
+- `f + bergerak` untuk berinteraksi extra dengan orang
 - `p` untuk pause
+- `enter` untuk memakai tool
+- `enter + bergerak` untuk makan 
 - `esc` untuk keluar menu
