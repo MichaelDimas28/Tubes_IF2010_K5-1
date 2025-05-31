@@ -1230,7 +1230,6 @@ public class Player implements Action {
         gp.cookingMenuActive = false;
         gp.ui.showRecipeDetails = false; 
     }
-    
     public boolean isCoalPartiallyUsed() {
         return coalPartiallyUsed;
     }

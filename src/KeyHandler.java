@@ -91,6 +91,7 @@ public class KeyHandler implements KeyListener{
                     if (guess == gp.ui.fishingTarget) {
                         gp.ui.showMessage("Kamu menangkap: " + gp.ui.currentFishingFish.getItemName());
                         gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(gp.ui.currentFishingFish.getItemName()), 1));
+                        gp.player.addFishCaught(1);
                         gp.ui.fishingActive = false;
                         gp.gamePaused = false;
                     } else if (gp.ui.fishingTriesLeft <= 0) {
@@ -203,6 +204,38 @@ public class KeyHandler implements KeyListener{
                 gp.ui.emilyStoreCol++;
                 if (gp.ui.emilyStoreCol > 12) gp.ui.emilyStoreCol = 12;
             }
+
+            if (code == KeyEvent.VK_ENTER) {
+                List<Items> currentStoreItems = gp.store.getCurrentSeasonItems();
+                int itemIndexInStore = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol;
+
+                if (itemIndexInStore >= 0 && itemIndexInStore < currentStoreItems.size()) {
+                    Items selectedItemFromStoreList = currentStoreItems.get(itemIndexInStore);
+
+                    if (selectedItemFromStoreList instanceof Recipe) {
+                        Recipe recipeItem = (Recipe) selectedItemFromStoreList;
+                        Items foodToCheck = gp.itemManager.getItem(recipeItem.getUnlocksFoodName());
+                        if (foodToCheck instanceof Food && ((Food) foodToCheck).isRecipeAcquired()) {
+                            gp.ui.showMessage("Kamu sudah memiliki resep ini!");
+                            return;
+                        }
+                        gp.ui.quantityInput = "1"; 
+                        gp.ui.enteringQuantity = false;    // Lewati tahap input kuantitas
+                        gp.ui.confirmingPurchase = true;   // Langsung ke tahap konfirmasi pembelian
+                        gp.ui.confirmYes = true;           // Default ke YA
+                        return; // Input sudah ditangani untuk RecipeItem
+                    }
+                    // Jika bukan RecipeItem, lanjutkan ke input kuantitas normal
+                    gp.ui.enteringQuantity = true;
+                    gp.ui.quantityInput = "";
+                }
+            } else if (code == KeyEvent.VK_ESCAPE) { 
+                gp.ui.emilyStoreActive = false;
+                gp.ui.enteringQuantity = false;
+                gp.ui.confirmingPurchase = false;
+                gp.ui.quantityInput = "";
+            }
+
 
             int storeSize = gp.store.getCurrentSeasonItems().size();
             int index = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol;
