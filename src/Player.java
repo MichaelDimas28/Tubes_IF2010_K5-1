@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 // import java.util.HashMap;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Player implements Action {
     public int worldX, worldY;
@@ -38,6 +40,16 @@ public class Player implements Action {
     public final int fishCooldownMax = 30; // frame (30 = 0.5 detik kalau 60FPS)
     int fishingPhase = 0; // 0 = belum dimulai, 1 = rod_1, 2 = rod_2
     int fishingFrameCounter = 0;
+
+    // untuk cooking
+    private boolean hasHarvestedForFirstTime = false;
+    private boolean hotPepperObtained = false; 
+    public boolean isCooking = false;
+    private Food recipeBeingCooked = null;
+    private int cookingCompletionDay;
+    private int cookingCompletionHour;
+    private int cookingCompletionMinute;
+    private boolean coalPartiallyUsed = false;
 
     public UI ui;
     GamePanel gp;
@@ -940,6 +952,7 @@ public class Player implements Action {
 
     public void addFishCaught(int fish){
         fish_caught += fish;
+        checkAndUnlockRecipes();
     }
 
     //Coordinate
@@ -1000,6 +1013,226 @@ public class Player implements Action {
         else{
             setEnergy(100);
         }
+    }
+
+    public void setHasHarvestedForFirstTime(boolean val) {
+        this.hasHarvestedForFirstTime = val;
+        if (val) {
+            checkAndUnlockRecipes();
+        }
+    }
+
+    public void onItemAddedToInventory(Items item) {
+        if (item.getItemName().equals("Hot Pepper") && !hotPepperObtained) {
+            this.hotPepperObtained = true;
+            checkAndUnlockRecipes();
+        }
+        
+        if (item.getItemName().equals("Fish n' Chips")) {
+            Food fishNChipsRecipe = (Food) gp.itemManager.getItem("Fish n' Chips");
+            if (fishNChipsRecipe != null && !fishNChipsRecipe.isRecipeAcquired()) {
+                fishNChipsRecipe.setRecipeAcquired(true);
+                gp.ui.showMessage("Resep Baru Terbuka: Fish n' Chips!");
+            }
+        }
+        if (item.getItemName().equals("Fish Sandwich")) {
+            Food fishSandwichRecipe = (Food) gp.itemManager.getItem("Fish Sandwich");
+            if (fishSandwichRecipe != null && !fishSandwichRecipe.isRecipeAcquired()) {
+                fishSandwichRecipe.setRecipeAcquired(true);
+                gp.ui.showMessage("Resep Baru Terbuka: Fish Sandwich!");
+            }
+        }
+        // Untuk resep Fugu, periksa setelah item ditambahkan
+        checkAndUnlockRecipes();
+    }
+
+    public void checkAndUnlockRecipes() {
+        // Sashimi: Setelah memancing 10 ikan
+        Food sashimiRecipe = (Food) gp.itemManager.getItem("Sashimi");
+        if (sashimiRecipe != null && !sashimiRecipe.isRecipeAcquired() && getFishCaught() >= 10) {
+            sashimiRecipe.setRecipeAcquired(true);
+            gp.ui.showMessage("Resep Baru Terbuka: Sashimi!");
+        }
+
+        // Fugu: Memancing pufferfish (artinya Pufferfish ada di inventory)
+        Food fuguRecipe = (Food) gp.itemManager.getItem("Fugu");
+        if (fuguRecipe != null && !fuguRecipe.isRecipeAcquired() && inventory.hasItemByName("Pufferfish")) {
+            fuguRecipe.setRecipeAcquired(true);
+            gp.ui.showMessage("Resep Baru Terbuka: Fugu!");
+        }
+
+        // Veggie Soup: Memanen untuk pertama kalinya
+        Food veggieSoupRecipe = (Food) gp.itemManager.getItem("Veggie Soup");
+        if (veggieSoupRecipe != null && !veggieSoupRecipe.isRecipeAcquired() && hasHarvestedForFirstTime) {
+            veggieSoupRecipe.setRecipeAcquired(true);
+            gp.ui.showMessage("Resep Baru Terbuka: Veggie Soup!");
+        }
+
+        // Fish Stew: Dapatkan "Hot Pepper" terlebih dahulu
+        Food fishStewRecipe = (Food) gp.itemManager.getItem("Fish Stew");
+        if (fishStewRecipe != null && !fishStewRecipe.isRecipeAcquired() && hotPepperObtained) {
+            fishStewRecipe.setRecipeAcquired(true);
+            gp.ui.showMessage("Resep Baru Terbuka: Fish Stew!");
+        }
+
+        // The Legends of Spakbor: Memancing "Legend"
+        Food legendsRecipe = (Food) gp.itemManager.getItem("The Legends of Spakbor");
+        if (legendsRecipe != null && !legendsRecipe.isRecipeAcquired() && inventory.hasItemByName("Legend")) {
+            legendsRecipe.setRecipeAcquired(true);
+            gp.ui.showMessage("Resep Baru Terbuka: The Legends of Spakbor!");
+        }
+    }
+
+    public Food getRecipeBeingCooked() { return recipeBeingCooked; }
+    public int getCookingCompletionDay() { return cookingCompletionDay; }
+    public int getCookingCompletionTimeAsInt() { return cookingCompletionHour * 100 + cookingCompletionMinute; }
+
+    public void finishCooking() {
+        if (!isCooking || recipeBeingCooked == null) {
+            return;
+        }
+
+        // 1. Konsumsi Bahan
+        Map<String, Integer> requiredIngredientsMap = new HashMap<>();
+        for (Items ing : recipeBeingCooked.getIngredients()) {
+            requiredIngredientsMap.put(ing.getItemName(), requiredIngredientsMap.getOrDefault(ing.getItemName(), 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : requiredIngredientsMap.entrySet()) {
+            InventoryItem playerIng = inventory.findItemByName(entry.getKey());
+            // Seharusnya sudah dicek sebelum memulai, tapi cek lagi untuk keamanan
+            if (playerIng == null || playerIng.getQuantity() < entry.getValue()) {
+                System.err.println("Error: Kekurangan bahan " + entry.getKey() + " saat menyelesaikan masakan!");
+                gp.ui.showMessage("Gagal menyelesaikan masakan: " + recipeBeingCooked.getItemName() + ", bahan kurang.");
+                isCooking = false;
+                recipeBeingCooked = null;
+                // Pertimbangkan untuk mengembalikan energi jika gagal di tahap ini
+                return;
+            }
+            playerIng.setQuantity(playerIng.getQuantity() - entry.getValue());
+            if (playerIng.getQuantity() == 0) {
+                inventory.removeItem(playerIng);
+            }
+        }
+
+        // 2. Konsumsi Bahan Bakar
+        boolean fuelConsumedThisAction = false;
+        if (coalPartiallyUsed) {
+            coalPartiallyUsed = false; // Penggunaan kedua Coal, tidak mengurangi item lagi
+            fuelConsumedThisAction = true;
+            gp.ui.showMessage("Menyelesaikan penggunaan Coal.");
+        } else {
+            InventoryItem coal = inventory.findItemByName("Coal");
+            if (coal != null && coal.getQuantity() > 0) {
+                coal.setQuantity(coal.getQuantity() - 1);
+                if (coal.getQuantity() == 0) {
+                    inventory.removeItem(coal);
+                }
+                coalPartiallyUsed = true; // Tandai Coal sudah terpakai sekali
+                fuelConsumedThisAction = true;
+                gp.ui.showMessage("Menggunakan 1 Coal (sisa 1x masak).");
+            } else {
+                InventoryItem firewood = inventory.findItemByName("Firewood");
+                if (firewood != null && firewood.getQuantity() > 0) {
+                    firewood.setQuantity(firewood.getQuantity() - 1);
+                    if (firewood.getQuantity() == 0) {
+                        inventory.removeItem(firewood);
+                    }
+                    fuelConsumedThisAction = true;
+                    gp.ui.showMessage("Menggunakan 1 Firewood.");
+                }
+            }
+        }
+
+        if (!fuelConsumedThisAction) {
+            System.err.println("Error: Tidak ada bahan bakar untuk menyelesaikan masakan " + recipeBeingCooked.getItemName());
+            gp.ui.showMessage("Gagal menyelesaikan masakan: " + recipeBeingCooked.getItemName() + ", bahan bakar habis.");
+            isCooking = false;
+            recipeBeingCooked = null;
+            // Kembalikan energi yang terpakai untuk memulai
+            setEnergy(getEnergy() + 10);
+            return;
+        }
+
+        // 3. Tambahkan makanan yang sudah jadi ke inventory
+        inventory.addItem(new InventoryItem(recipeBeingCooked, 1));
+        gp.ui.showMessage(recipeBeingCooked.getItemName() + " sudah matang!");
+
+        isCooking = false;
+        recipeBeingCooked = null;
+    }
+
+    public void startCooking(Food recipe) {
+        if (isCooking) {
+            gp.ui.showMessage("Kamu sudah memasak sesuatu yang lain.");
+            return;
+        }
+
+        if (this.getEnergy() < 10) {
+            gp.ui.showMessage("Energi tidak cukup untuk mulai memasak (-10 diperlukan).");
+            return;
+        }
+
+        Map<String, Integer> requiredIngredientsMap = new HashMap<>();
+        if (recipe.getIngredients() == null) {
+            gp.ui.showMessage("Resep ini tidak memiliki daftar bahan!");
+            return;
+        }
+        for (Items ing : recipe.getIngredients()) {
+            requiredIngredientsMap.put(ing.getItemName(), requiredIngredientsMap.getOrDefault(ing.getItemName(), 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : requiredIngredientsMap.entrySet()) {
+            InventoryItem playerIng = inventory.findItemByName(entry.getKey());
+            if (playerIng == null || playerIng.getQuantity() < entry.getValue()) {
+                gp.ui.showMessage("Kekurangan " + entry.getKey() + " (Butuh: " + entry.getValue() + ", Punya: " + (playerIng == null ? 0 : playerIng.getQuantity()) + ")");
+                return;
+            }
+        }
+        boolean hasFuel = false;
+        if (coalPartiallyUsed) {
+            hasFuel = true;
+        } else {
+            InventoryItem coal = inventory.findItemByName("Coal");
+            if (coal != null && coal.getQuantity() > 0) {
+                hasFuel = true;
+            } else {
+                InventoryItem firewood = inventory.findItemByName("Firewood");
+                if (firewood != null && firewood.getQuantity() > 0) {
+                    hasFuel = true;
+                }
+            }
+        }
+
+        if (!hasFuel) {
+            gp.ui.showMessage("Tidak ada bahan bakar (Firewood atau Coal) untuk memasak.");
+            return;
+        }
+
+        setEnergy(getEnergy() - 10);
+        this.isCooking = true;
+        this.recipeBeingCooked = recipe;
+
+        this.cookingCompletionDay = gp.farm.getDay();
+        int currentHour = gp.farm.getTime().getHour();
+        int currentMinute = gp.farm.getTime().getMinute();
+
+        this.cookingCompletionMinute = currentMinute;
+        this.cookingCompletionHour = currentHour + 1;
+
+        if (this.cookingCompletionHour >= 24) {
+            this.cookingCompletionHour -= 24;
+            this.cookingCompletionDay += 1;
+        }
+        gp.farm.checkPassiveActions(this); 
+
+        gp.ui.showMessage("Mulai memasak " + recipe.getItemName() + ". Akan siap dalam 1 jam.");
+        gp.cookingMenuActive = false;
+        gp.ui.showRecipeDetails = false; 
+    }
+    
+    public boolean isCoalPartiallyUsed() {
+        return coalPartiallyUsed;
     }
 
     public void cook(Food food) {
