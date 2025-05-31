@@ -42,6 +42,21 @@ public class KeyHandler implements KeyListener{
             return; // Abaikan input lain jika game di-pause
         }
 
+        if (gp.ui.endGameStatsOn && code == KeyEvent.VK_ENTER) {
+            gp.ui.endGameStatsOn = false;
+            gp.gamePaused = false;
+            return;
+        }
+
+        // if (gp.ui.objectivesVisible) {
+        //     if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_ESCAPE) {
+        //         gp.ui.objectivesVisible = false;
+        //         gp.gamePaused = false;
+        //     }
+        //     return;
+        // }
+
+
         // --- AWAL PENAMBAHAN LOGIKA UNTUK COOKING ---
         // 2. Handle PEMBUKAAN MENU MASAK via interaksi Tombol SPACE (bukan 'C' lagi)
         // Hanya jika tidak ada menu UI lain yang lebih prioritas sedang aktif

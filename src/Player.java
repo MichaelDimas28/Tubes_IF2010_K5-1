@@ -77,6 +77,11 @@ public class Player implements Action {
     private int tileCol;
     private int tileRow;
     FarmTile targetTile;
+
+    public boolean hasSeenObjectiveNotification = false;
+    public boolean hasReachedEndGame = false;
+    public boolean isMarried = false;
+    
     private Coordinate coordinate = new Coordinate(0,0);
     private Inventory inventory = new Inventory();
     public final int MAX_ENERGY = 100;
@@ -191,6 +196,14 @@ public class Player implements Action {
     }
     
     public void update() {
+
+        if (!hasReachedEndGame && (gold >= 17209) && isMarried) {
+            hasReachedEndGame = true;
+            gp.gamePaused = true;
+            gp.ui.endGameStatsOn = true;
+            gp.ui.prepareEndGameStats(this, gp.npcManager);
+        }
+
         tileCol = (worldX + solidArea.x) / gp.tileSize;
         tileRow = (worldY + solidArea.y) / gp.tileSize;
         switch (direction) {
@@ -422,6 +435,7 @@ public class Player implements Action {
                             gp.player.setEnergy(gp.player.getEnergy()-80);
                             gp.dialogueOn = true;
                             gp.ui.showMessage("Kamu telah menikahi "+npc.getName()+"! Semoga langgeng terus ya!");
+                            isMarried = true;
                         } else {
                             interactWithNPC(npc);
                         }
@@ -471,7 +485,7 @@ public class Player implements Action {
                     interactWithNPC(npc);
                 }
                 keyH.spacePressed = false;
-            } else if (itemHeld != null && keyH.enterPressed && (itemHeld instanceof Food || itemHeld instanceof Fish || itemHeld instanceof Crops)) {
+            } else if (itemHeld != null && (keyH.enterPressed||keyH.fPressed) && (itemHeld instanceof Food || itemHeld instanceof Fish || itemHeld instanceof Crops)) {
                 if (energy < 100) {
                     inventory.reduceItem(itemHeld, 1); // Kurangi 1 item
                     if (inventory.getQuantity(itemHeld)<= 0) {
@@ -1047,7 +1061,7 @@ public class Player implements Action {
             gp.dialogueOn = true;
             if (!npc.getHasTalked()) {
                 npc.setHasTalked(true);
-                npc.setHeartPoints(npc.getHeartPoints()+10);
+                npc.setHeartPoints(npc.getHeartPoints()+150);
                 npc.setFreqChat(npc.getFreqChat()+1);
                 gp.player.setEnergy(gp.player.getEnergy()-10);
                 gp.farm.getTime().skipTime(10, null);
