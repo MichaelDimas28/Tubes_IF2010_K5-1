@@ -663,7 +663,7 @@ public class UI {
 
     public void processPurchase() {
         List<Items> currentSeasonStoreItems = gp.store.getCurrentSeasonItems();
-    int itemIndexInStore = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol; // Asumsi 13 item per baris
+    int itemIndexInStore = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol;
 
     if (itemIndexInStore < 0 || itemIndexInStore >= currentSeasonStoreItems.size()) {
         showMessage("Pilihan item tidak valid di toko.");
@@ -723,6 +723,8 @@ public class UI {
             gp.player.setGold(gp.player.getGold() - totalCost);
             gp.player.getInventory().addItem(new InventoryItem(actualSelectedStoreItem, quantityForThisPurchase));
             showMessage("Membeli " + quantityForThisPurchase + " " + actualSelectedStoreItem.getItemName() + "!");
+            gp.player.addTotalExpenditure(totalCost);
+            gp.player.expenditures[gp.farm.getDay()] += totalCost;
         } else {
             showMessage("Gold tidak cukup!");
         }
