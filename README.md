@@ -17,7 +17,7 @@ Game ini adalah game simulasi pertanian yang dibuat dengan gaya retro. Dalam gam
 ### Requirements
 
 Untuk memainkan game ini dibutuhkan
-- java versi 8 keatas
+- java versi 24 keatas
 
 ### Cara install
 
