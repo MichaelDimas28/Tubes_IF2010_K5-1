@@ -40,6 +40,8 @@ public class Store {
         springStore.add(gp.itemManager.getItem("Fish Stew"));
         springStore.add(gp.itemManager.getItem("Fish Sandwich"));
         springStore.add(gp.itemManager.getItem("Cooked Pig's Head"));
+        springStore.add(gp.itemManager.getItem("Resep Fish n Chips"));
+        springStore.add(gp.itemManager.getItem("Resep Fish Sandwich"));
 
         // Summer Store
         summerStore.add(gp.itemManager.getItem("Blueberry Seeds"));
@@ -67,6 +69,8 @@ public class Store {
         summerStore.add(gp.itemManager.getItem("Fish Stew"));
         summerStore.add(gp.itemManager.getItem("Fish Sandwich"));
         summerStore.add(gp.itemManager.getItem("Cooked Pig's Head"));
+        summerStore.add(gp.itemManager.getItem("Resep Fish n Chips"));
+        summerStore.add(gp.itemManager.getItem("Resep Fish Sandwich"));
 
         // Fall Store
         fallStore.add(gp.itemManager.getItem("Cranberry Seeds"));
@@ -95,6 +99,8 @@ public class Store {
         fallStore.add(gp.itemManager.getItem("Fish Stew"));
         fallStore.add(gp.itemManager.getItem("Fish Sandwich"));
         fallStore.add(gp.itemManager.getItem("Cooked Pig's Head"));
+        fallStore.add(gp.itemManager.getItem("Resep Fish n Chips"));
+        fallStore.add(gp.itemManager.getItem("Resep Fish Sandwich"));
 
         // Winter Store
         winterStore.add(gp.itemManager.getItem("Parsnip"));
@@ -118,6 +124,8 @@ public class Store {
         winterStore.add(gp.itemManager.getItem("Fish Stew"));
         winterStore.add(gp.itemManager.getItem("Fish Sandwich"));
         winterStore.add(gp.itemManager.getItem("Cooked Pig's Head"));
+        winterStore.add(gp.itemManager.getItem("Resep Fish n Chips"));
+        winterStore.add(gp.itemManager.getItem("Resep Fish Sandwich"));
     }
     
     public List<Items> getSpringItems() {
