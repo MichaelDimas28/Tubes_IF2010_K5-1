@@ -1,9 +1,0 @@
-x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
-x x x x x R R R x x x x x x x x x x x x x x x x x x x x L L L x
-x x x x R R R x x x x x A x x S x C x M x x x x x x x x L L L x
-x x x R R x x x x x x x . x x . x . x . x x x x . . . . . . . x
-x x R R . . . . . . . . . . . . . . . . . . . . . . x x x x x x
-x R R R x x x x x x x . x x x . x x x . x x x x . x x x x x x x
-x R R x x x x x x x x P x x F F F x x D x x x x . . . x x x x x
-x R R x x x x x x x x x x x F F F x x x x x x x O O O x x x x x
-x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x
