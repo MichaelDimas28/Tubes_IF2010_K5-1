@@ -36,4 +36,24 @@ public class Inventory {
     public int totalItems() {
         return items.size();
     }
+
+    public boolean hasItemByName(String itemName) {
+        for (InventoryItem invItem : items) {
+            if (invItem.getItem().getItemName().equals(itemName) && invItem.getQuantity() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public InventoryItem findItemByName(String name) {
+        for (InventoryItem invItem : items) {
+            if (invItem.getItem().getItemName().equals(name)) {
+                return invItem;
+            }
+        }
+        return null;
+    }
+
+
 }

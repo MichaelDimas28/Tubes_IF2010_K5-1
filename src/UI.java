@@ -36,7 +36,11 @@ public class UI {
     public boolean confirmingPurchase = false;
     public String quantityInput = "";
     public boolean confirmYes = true;
-    
+    public int cookingMenuSelection = 0;
+    public List<Food> availableRecipes = new ArrayList<>();
+    public boolean showRecipeDetails = false;
+    public Food selectedRecipeForDetail = null;
+
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -320,7 +324,13 @@ public class UI {
     }
 
     public void drawSubWindow(int x, int y, int width, int height) {
-        Color bgColor = new Color(0, 0, 0, 180);
+        Color bgColor;
+        if (gp.cookingMenuActive) {
+            bgColor = new Color(30, 30, 50, 235);
+        } else {
+            bgColor = new Color(0, 0, 0, 180);
+        }
+
         Color borderColor = Color.white;
 
         g2.setColor(bgColor);
@@ -329,6 +339,7 @@ public class UI {
         g2.setStroke(new BasicStroke(3));
         g2.setColor(borderColor);
         g2.drawRoundRect(x, y, width, height, 35, 35);
+
     }
 
 
@@ -480,7 +491,150 @@ public class UI {
             case Season.Winter: return gp.store.getWinterItems();
         }
         return new ArrayList<>();
-}
+    }
+
+    public void drawCookingMenu(Graphics2D g2) {
+        int menuPadding = gp.tileSize * 2; // Padding dari tepi layar
+        int frameX = menuPadding;
+        int frameY = menuPadding / 2 ; // Lebih ke atas sedikit
+        int frameWidth = gp.screenWidth - (menuPadding * 2);
+        int frameHeight = gp.screenHeight - (menuPadding); // Lebih tinggi
+
+        drawSubWindow(frameX, frameY, frameWidth, frameHeight); // Gambar kotak menu
+
+        g2.setColor(Color.white);
+        g2.setFont(arial_40.deriveFont(28F)); // Font untuk judul
+
+        int lineSpacing = 30;
+        int textPaddingX = frameX + 30; // Padding teks dari tepi kiri kotak menu
+        int currentY = frameY + 50;    // Posisi Y awal untuk teks di dalam kotak menu
+
+        if (!showRecipeDetails) {
+            // TAMPILKAN DAFTAR RESEP
+            String title1 = "Pilih Resep";
+            g2.drawString(title1, textPaddingX, currentY);
+            currentY += lineSpacing - 5;
+
+            g2.setFont(arial_40.deriveFont(20F)); // Font lebih kecil untuk sub-judul
+            String title2 = "(Enter untuk Detail)";
+            g2.drawString(title2, textPaddingX, currentY);
+            currentY += lineSpacing + 10;
+            g2.setFont(arial_40.deriveFont(24F)); // Kembali ke font untuk daftar resep
+
+            if (availableRecipes.isEmpty()) {
+                g2.drawString("Tidak ada resep yang bisa dimasak.", textPaddingX, currentY);
+            } else {
+                for (int i = 0; i < availableRecipes.size(); i++) {
+                    // Pastikan cookingMenuSelection valid
+                    if (cookingMenuSelection < 0 || cookingMenuSelection >= availableRecipes.size()) {
+                        cookingMenuSelection = 0; // Default ke item pertama jika tidak valid
+                        if (availableRecipes.isEmpty()) break; // Keluar jika tetap kosong
+                    }
+
+                    if (i == cookingMenuSelection) {
+                        g2.setColor(Color.yellow);
+                        g2.drawString("> " + availableRecipes.get(i).getItemName(), textPaddingX + 10, currentY + (i * lineSpacing));
+                    } else {
+                        g2.setColor(Color.white);
+                        g2.drawString(availableRecipes.get(i).getItemName(), textPaddingX + 30, currentY + (i * lineSpacing));
+                    }
+                }
+            }
+            g2.setColor(Color.white);
+            g2.setFont(arial_40.deriveFont(20F));
+            g2.drawString("ESC untuk Keluar", textPaddingX, frameY + frameHeight - 30);
+
+        } else {
+            // TAMPILKAN DETAIL RESEP YANG DIPILIH
+            if (selectedRecipeForDetail == null) {
+                showRecipeDetails = false; 
+                return;
+            }
+            g2.setFont(arial_40.deriveFont(28F));
+            g2.drawString("Resep: " + selectedRecipeForDetail.getItemName(), textPaddingX, currentY);
+            currentY += lineSpacing + 15;
+
+            g2.setFont(arial_40.deriveFont(22F)); // Font lebih kecil untuk detail
+
+            // Bahan-bahan
+            g2.drawString("Bahan Dibutuhkan:", textPaddingX, currentY);
+            currentY += lineSpacing;
+            // ... (Logika penggambaran bahan seperti sebelumnya, pastikan posisi Y (currentY) di-update) ...
+            // Contoh untuk satu bahan:
+            // g2.drawString("- " + entry.getKey() + " x" + entry.getValue(), textPaddingX + 20, currentY);
+            // currentY += lineSpacing - 5;
+            Map<String, Integer> requiredIngredientsMap = new HashMap<>();
+            if (selectedRecipeForDetail.getIngredients() != null && !selectedRecipeForDetail.getIngredients().isEmpty()) {
+                for (Items ing : selectedRecipeForDetail.getIngredients()) {
+                    requiredIngredientsMap.put(ing.getItemName(), requiredIngredientsMap.getOrDefault(ing.getItemName(), 0) + 1);
+                }
+                for (Map.Entry<String, Integer> entry : requiredIngredientsMap.entrySet()) {
+                    InventoryItem playerIng = gp.player.getInventory().findItemByName(entry.getKey());
+                    int playerQty = (playerIng == null) ? 0 : playerIng.getQuantity();
+
+                    g2.setColor((playerQty >= entry.getValue()) ? Color.white : Color.red);
+                    g2.drawString("- " + entry.getKey() + " x" + entry.getValue() + " (Punya: " + playerQty + ")", textPaddingX + 20, currentY);
+                    g2.setColor(Color.white); 
+                    currentY += lineSpacing - 5;
+                }
+            } else {
+                g2.drawString("- (Resep ini tidak memiliki bahan!)", textPaddingX + 20, currentY);
+                currentY += lineSpacing -5;
+            }
+            currentY += 15; // Spasi
+
+            // Bahan Bakar
+            g2.drawString("Bahan Bakar Dibutuhkan:", textPaddingX, currentY);
+            currentY += lineSpacing;
+            // ... (Logika penggambaran bahan bakar seperti sebelumnya, update currentY) ...
+            InventoryItem coal = gp.player.getInventory().findItemByName("Coal");
+            InventoryItem firewood = gp.player.getInventory().findItemByName("Firewood");
+            int coalQty = (coal == null) ? 0 : coal.getQuantity();
+            int firewoodQty = (firewood == null) ? 0 : firewood.getQuantity();
+            boolean hasSufficientFuel = false;
+            String fuelStatus = "";
+
+            if (gp.player.isCoalPartiallyUsed()) { 
+                hasSufficientFuel = true;
+                fuelStatus = "- Sisa penggunaan Coal tersedia.";
+            } else if (coalQty > 0) {
+                hasSufficientFuel = true;
+                fuelStatus = "- Coal x1 (Punya: " + coalQty + ")";
+            } else if (firewoodQty > 0) {
+                hasSufficientFuel = true;
+                fuelStatus = "- Firewood x1 (Punya: " + firewoodQty + ")";
+            } else {
+                fuelStatus = "- Tidak ada bahan bakar!";
+            }
+            g2.setColor(hasSufficientFuel ? Color.white : Color.red);
+            g2.drawString(fuelStatus, textPaddingX + 20, currentY);
+            g2.setColor(Color.white);
+            currentY += lineSpacing + 15;
+
+
+            // Opsi Masak / Kembali
+            g2.setFont(arial_40.deriveFont(24F)); // Font untuk opsi
+            String masakText = "Masak";
+            String kembaliText = "Kembali";
+
+            if (cookingMenuSelection == 0) { // 0 untuk "Masak"
+                g2.setColor(Color.yellow);
+                g2.drawString("> " + masakText, textPaddingX + 20, currentY);
+                g2.setColor(Color.white);
+                g2.drawString(kembaliText, textPaddingX + 20, currentY + lineSpacing);
+            } else { // 1 untuk "Kembali"
+                g2.setColor(Color.white);
+                g2.drawString(masakText, textPaddingX + 20, currentY);
+                g2.setColor(Color.yellow);
+                g2.drawString("> " + kembaliText, textPaddingX + 20, currentY + lineSpacing);
+            }
+            g2.setColor(Color.white);
+            g2.setFont(arial_40.deriveFont(20F));
+            g2.drawString("ESC untuk Kembali ke Daftar Resep", textPaddingX, frameY + frameHeight - 30);
+        }
+    }
+
+
 
     public void loadDialogues() {
         npcDialogues.put("Emily", List.of(
@@ -630,4 +784,5 @@ public class UI {
             "Di sini ada event jejepangan gak ya? Udah lama gak nge-event, kapan-kapan adain yuk!"
         ));
     }
+    
 }
