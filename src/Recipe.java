@@ -12,7 +12,4 @@ public class Recipe extends Items {
     public String getUnlocksFoodName() {
         return unlocksFoodName;
     }
-
-    // Anda tidak perlu menambahkan item resep ini ke inventory pemain.
-    // Jadi, tidak ada logika khusus lain yang biasanya dibutuhkan di sini selain data.
 }

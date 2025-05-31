@@ -103,7 +103,7 @@ public class ItemManager {
 
         // Recipe
         itemMap.put("Resep Fish n Chips", new Recipe("Resep Fish n Chips", 100, "recipe.png", "Fish n' Chips"));
-        itemMap.put("Resep Fish Sandwich", new Recipe("Resep Fish Sandwich", 100, "recipe.png", " Fish Sandwich"));
+        itemMap.put("Resep Fish Sandwich", new Recipe("Resep Fish Sandwich", 100, "recipe.png", "Fish Sandwich"));
         
         for (Items item : itemMap.values()) {
         item.setImage(setup(item.getImageName(), 48, 48));
