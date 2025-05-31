@@ -39,8 +39,8 @@ public class GamePanel extends JPanel implements Runnable {
     public CollisionChecker collisionChecker = new CollisionChecker(this);
     public ItemManager itemManager = new ItemManager();
     public NPCManager npcManager = new NPCManager(this);
-    public Player player = new Player("Test", Gender.Male, 100, 0, this, keyH);
-
+    public Player player = new Player("Test", Gender.Male, 100, 1000, this, keyH);
+    public Store store = new Store(this);
     // public int gameState;
     // public final int playState = 1;
     // public final int pauseState = 2;

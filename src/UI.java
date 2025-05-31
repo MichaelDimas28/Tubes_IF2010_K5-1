@@ -2,6 +2,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -27,7 +28,15 @@ public class UI {
     public boolean emilyMenuActive = false;
     public NPC currentEmily;
     public int emilyMenuSelection = 0;
-
+    public boolean emilyStoreActive = false;
+    public int emilyStoreRow = 0;
+    public int emilyStoreCol = 0;
+    public int buyQuantity = 1;
+    public boolean enteringQuantity = false;
+    public boolean confirmingPurchase = false;
+    public String quantityInput = "";
+    public boolean confirmYes = true;
+    
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -35,19 +44,27 @@ public class UI {
         this.farm = farm;
         loadDialogues();
     }
-
+    
     public void showMessage(String text) {
         message = text;
         messageOn = true;
     }
-
+    
     public void draw(Graphics2D g2) {
         this.g2 = g2;
-
+        
         g2.setFont(arial_40);
         g2.setColor(Color.white);
         
+        drawPlayerStats(g2);
         drawTimeWindow(g2);
+        drawItemHeld();
+
+        if (emilyStoreActive) {
+            drawEmilyStore(g2);
+            return;
+        }
+
         if (gp.gamePaused) {
             String text = "PAUSED";
             int x = getCenteredX(text);
@@ -127,6 +144,7 @@ public class UI {
                 }
                 g2.drawString(options[i], frameX + 20, frameY + 50 + i * 40);
             }
+
 
 
         }
@@ -247,7 +265,20 @@ public class UI {
     }
 
 
+    public void drawPlayerStats(Graphics2D g2) {
+        int x = 20;
+        int y = 20;
+        int width = 175;
+        int height = 60;
 
+        drawSubWindow(x, y, width, height);
+        g2.setFont(new Font("Arial", Font.PLAIN, 18));
+        g2.setColor(Color.white);
+        int lineHeight = 20;
+
+        g2.drawString("Energy: "+gp.player.getEnergy()+" / 100", x+10, y+25);
+        g2.drawString("Gold: "+gp.player.getGold()+"g", x+10, y+25+lineHeight);
+    } 
     public void drawTimeWindow(Graphics2D g2) {
         int x = gp.screenWidth - 220;
         int y = 20;
@@ -255,12 +286,12 @@ public class UI {
         int height = 100;
 
         // Background box
-        g2.setColor(new Color(0, 0, 0, 150)); // semi-transparan
-        g2.fillRoundRect(x, y, width, height, 15, 15);
+        g2.setColor(new Color(0, 0, 0, 180)); // semi-transparan
+        g2.fillRoundRect(x, y, width, height, 35, 35);
 
         g2.setColor(Color.white);
-        g2.setStroke(new BasicStroke(2));
-        g2.drawRoundRect(x, y, width, height, 15, 15);
+        g2.setStroke(new BasicStroke(3));
+        g2.drawRoundRect(x, y, width, height, 35, 35);
         g2.setFont(arial_40.deriveFont(Font.PLAIN, 18F));
 
         g2.drawString("Day " + farm.getDay(), x + 10, y + 25);
@@ -323,13 +354,91 @@ public class UI {
 
         // Draw sisa baris terakhir
         g2.drawString(line.toString(), x, y);
-}
+    }  
 
 
-    private int getCenteredX(String text) {
-        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
-        return gp.screenWidth / 2 - length / 2;
-    }
+        private int getCenteredX(String text) {
+            int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();
+            return gp.screenWidth / 2 - length / 2;
+        }
+
+        public void drawItemHeld() {
+            if (gp.player.getItemHeld() != null && !(gp.player.getItemHeld() instanceof Equipment)) {
+                Items itemHeld = gp.player.getItemHeld();
+                BufferedImage heldImage = itemHeld.getImage();
+
+                // Posisi karakter di layar (screenX dan screenY adalah koordinat karakter di layar)
+                int screenX = gp.player.screenX;
+                int screenY = gp.player.screenY;
+
+                // Ukuran tile
+                int tileSize = gp.tileSize;
+
+                // Scale Gambar
+                UtilityTool uTool = new UtilityTool();
+                BufferedImage scaledImage = uTool.scaleImage(heldImage, gp.tileSize*4/5, gp.tileSize*4/5);
+
+                // Hitung posisi gambar itemHeld (1 tile di atas karakter)
+                int drawX = 1+screenX + (tileSize - tileSize*4/5)/2;
+                int drawY = screenY - tileSize + 16;
+
+                g2.drawImage(scaledImage, drawX, drawY, null);
+            }
+        }
+
+        public void drawEmilyStore(Graphics2D g2) {
+        List<Items> storeItems = getCurrentSeasonStoreItems();
+        int frameX = gp.tileSize;
+        int frameY = gp.tileSize;
+        int width = gp.tileSize * 14;
+        int height = gp.tileSize * 5;
+        drawSubWindow(frameX, frameY, width, height);
+
+        int slotX = frameX + 20;
+        int slotY = frameY + 20;
+        for (int i = 0; i < storeItems.size(); i++) {
+            int col = i % 13;
+            int row = i / 13;
+            int x = slotX + col * gp.tileSize;
+            int y = slotY + row * gp.tileSize;
+            g2.drawImage(storeItems.get(i).getImage(), x, y, null);
+            if (row == emilyStoreRow && col == emilyStoreCol) {
+                g2.setColor(Color.white);
+                g2.setStroke(new BasicStroke(3));
+                g2.drawRoundRect(x, y, gp.tileSize, gp.tileSize, 10, 10);
+            }
+        }
+
+        // Deskripsi
+            int index = emilyStoreRow * 13 + emilyStoreCol;
+            if (index < storeItems.size()) {
+                Items selected = storeItems.get(index);
+                drawSubWindow(frameX, frameY + height + 10, 280, 50);
+                g2.setColor(Color.white);
+                g2.setFont(arial_40.deriveFont(16f));
+                g2.drawString(selected.getItemName() + " - " + selected.getBuyPrice() + "g", frameX + 20, frameY + height + 40);
+            }
+            
+            // Input jumlah
+            if (enteringQuantity) {
+                drawSubWindow(frameX+290, 300, 150, 50);
+                g2.setColor(Color.white);
+                g2.drawString("Jumlah: " + quantityInput, frameX+300, frameY+height+40);
+            }
+            
+            if (confirmingPurchase) {
+                Items selected = storeItems.get(index);
+                drawSubWindow(frameX, frameY+height+70, 250, 150);
+                g2.setColor(Color.white);
+                g2.drawString("Total harga: "+selected.getBuyPrice()*(Integer.parseInt(quantityInput))+"g", frameX+20, frameY+height+100);
+                g2.drawString("Uang anda: "+gp.player.getGold()+"g", frameX+20, frameY+height+130);
+                g2.drawString("Yakin beli?", frameX+20, frameY+height+160);
+                g2.setColor(confirmYes ? Color.YELLOW : Color.white);
+                g2.drawString("YA", frameX+20, frameY+height+190);
+                g2.setColor(!confirmYes ? Color.YELLOW : Color.white);
+                g2.drawString("TIDAK", frameX+80, frameY+height+190);
+            }
+        }
 
     public void setEmilyInteractionMode(NPC emily) {
         // tampilkan UI pilihan Talk / Buy (misalnya pakai boolean emilyMenuActive, selectedIndex)
@@ -337,6 +446,41 @@ public class UI {
         this.currentEmily = emily;
         emilyMenuSelection = 0;
     }
+
+    public void processPurchase() {
+        Items item = getCurrentSeasonStoreItems().get(emilyStoreRow * 13 + emilyStoreCol);
+        int totalCost = item.getBuyPrice() * buyQuantity;
+
+        if (gp.player.getGold() < totalCost) {
+            showMessage("Uang anda kurang!");
+            confirmingPurchase = false;
+            enteringQuantity = false;
+            return;
+        }
+
+        gp.player.setGold(gp.player.getGold() - totalCost);
+        if (item.getItemName()=="Wheat Seeds") {
+            gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(item.getItemName()+" ("+gp.farm.getSeason()+")"), buyQuantity));
+        } else {
+            gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(item.getItemName()), buyQuantity));
+        }
+        showMessage("Terima kasih telah membeli!");
+        confirmingPurchase = false;
+        enteringQuantity = false;
+        emilyStoreActive = false;
+        quantityInput = "";
+    }
+
+
+    public List<Items> getCurrentSeasonStoreItems() {
+        switch (gp.farm.getSeason()) {
+            case Season.Spring: return gp.store.getSpringItems();
+            case Season.Summer: return gp.store.getSummerItems();
+            case Season.Fall:   return gp.store.getFallItems();
+            case Season.Winter: return gp.store.getWinterItems();
+        }
+        return new ArrayList<>();
+}
 
     public void loadDialogues() {
         npcDialogues.put("Emily", List.of(

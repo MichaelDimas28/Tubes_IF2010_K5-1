@@ -99,6 +99,7 @@ public class ItemManager {
         // Miscellaneous
         itemMap.put("Coal", new Miscellaneous("Coal", 45, 30, "coal.png"));
         itemMap.put("Firewood", new Miscellaneous("Firewood", 30, 15, "wood.png"));
+        itemMap.put("Proposal Ring", new Miscellaneous("Proposal Ring", 1000, 0, "ring.png"));
         
         for (Items item : itemMap.values()) {
         item.setImage(setup(item.getImageName(), 48, 48));

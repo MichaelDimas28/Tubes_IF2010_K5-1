@@ -12,6 +12,7 @@ public class KeyHandler implements KeyListener{
     public boolean enterPressed;
     public boolean spacePressed;
     public boolean iPressed;
+    
 
     public KeyHandler (GamePanel gp) {
         this.gp = gp;
@@ -48,8 +49,12 @@ public class KeyHandler implements KeyListener{
                         gp.ui.currentEmily.setFreqChat(gp.ui.currentEmily.getFreqChat()+1);
                     }
                 } else if (gp.ui.emilyMenuSelection == 1) { // Buy
-                    gp.dialogueOn = true;
-                    gp.ui.currentDialogue = gp.ui.npcDialogues.get("Emily").get(11); // dialog index 8
+                    // gp.dialogueOn = true;
+                    // gp.ui.currentDialogue = gp.ui.npcDialogues.get("Emily").get(11); // dialog index 8
+                    gp.ui.emilyStoreActive = true;
+                    gp.dialogueOn = false;
+                    gp.ui.slotRow = 0;
+                    gp.ui.slotCol = 0;
                 }
                 gp.ui.emilyMenuActive = false; // tutup menu
             }
@@ -57,10 +62,71 @@ public class KeyHandler implements KeyListener{
             return; // abaikan input lain saat menu Emily aktif
         }
 
-        // if (code == KeyEvent.VK_SPACE && gp.binOpen) {
-        //     gp.binOpen = false;
-        //     return;
-        // }
+        if (gp.ui.emilyStoreActive) {
+            if (gp.ui.enteringQuantity) {
+                if (Character.isDigit(e.getKeyChar())) {
+                    gp.ui.quantityInput += e.getKeyChar();
+                } else if (code == KeyEvent.VK_BACK_SPACE && gp.ui.quantityInput.length() > 0) {
+                    gp.ui.quantityInput = gp.ui.quantityInput.substring(0, gp.ui.quantityInput.length() - 1);
+                } else if (code == KeyEvent.VK_ENTER) {
+                    try {
+                        int qty = Integer.parseInt(gp.ui.quantityInput);
+                        gp.ui.buyQuantity = Math.max(1, qty);
+                        gp.ui.enteringQuantity = false;
+                        gp.ui.confirmingPurchase = true;
+                        gp.ui.confirmYes = true;
+                    } catch (NumberFormatException ex) {
+                        gp.ui.quantityInput = "";
+                    }
+                }
+                return;
+            } else if (gp.ui.confirmingPurchase) {
+                if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT || code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+                    gp.ui.confirmYes = !gp.ui.confirmYes;
+                } else if (code == KeyEvent.VK_ENTER) {
+                    if (gp.ui.confirmYes && Integer.parseInt(gp.ui.quantityInput)>0) {
+                        gp.ui.processPurchase();
+                    } else {
+                        gp.ui.confirmingPurchase = false;
+                        gp.ui.enteringQuantity = false;
+                    }
+                }
+                return;
+            }
+
+            if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
+                gp.ui.emilyStoreRow--;
+                if (gp.ui.emilyStoreRow < 0) gp.ui.emilyStoreRow = 0;
+            }
+            if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
+                gp.ui.emilyStoreRow++;
+                if (gp.ui.emilyStoreRow > 4) gp.ui.emilyStoreRow = 4;
+            }
+            if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
+                gp.ui.emilyStoreCol--;
+                if (gp.ui.emilyStoreCol < 0) gp.ui.emilyStoreCol = 0;
+            }
+            if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
+                gp.ui.emilyStoreCol++;
+                if (gp.ui.emilyStoreCol > 12) gp.ui.emilyStoreCol = 12;
+            }
+
+            int storeSize = gp.store.getCurrentSeasonItems().size();
+            int index = gp.ui.emilyStoreRow * 13 + gp.ui.emilyStoreCol;
+            if (index >= storeSize) {
+                gp.ui.emilyStoreRow = (storeSize - 1) / 13;
+                gp.ui.emilyStoreCol = (storeSize - 1) % 13;
+            }
+
+            if (code == KeyEvent.VK_ENTER) {
+                gp.ui.enteringQuantity = true;
+                gp.ui.quantityInput = "";
+            } else if (code == KeyEvent.VK_ESCAPE || code == KeyEvent.VK_SPACE) {
+                gp.ui.emilyStoreActive = false;
+            }
+            return;
+        }
+
 
         if (gp.binOpen) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
@@ -135,40 +201,6 @@ public class KeyHandler implements KeyListener{
             }
             return;
         }
-
-        // if (code == KeyEvent.VK_ENTER && gp.binOpen) {
-        //     if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
-        //         gp.ui.slotRow--;
-        //         if (gp.ui.slotRow < 0) gp.ui.slotRow = 0;
-        //     }
-        //     if (code == KeyEvent.VK_A || code == KeyEvent.VK_LEFT) {
-        //         gp.ui.slotCol--;
-        //         if (gp.ui.slotCol < 0) gp.ui.slotCol = 0;
-        //     }
-        //     if (code == KeyEvent.VK_S || code == KeyEvent.VK_DOWN) {
-        //         gp.ui.slotRow++;
-        //         if (gp.ui.slotRow > 4) gp.ui.slotRow = 4;
-        //     }
-        //     if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
-        //         gp.ui.slotCol++;
-        //         if (gp.ui.slotCol > 12) gp.ui.slotCol = 12;
-        //     }
-
-        //     int index = gp.ui.slotRow * 4 + gp.ui.slotCol;
-        //     InventoryItem selectedItem = gp.player.getInventory().getItems().get(index);
-        //     if (selectedItem != null && selectedItem.getQuantity() > 0) {
-        //         InventoryItem itemToShip = new InventoryItem(selectedItem.getItem(), 1);
-        //         boolean added = gp.farm.getShippingBin().addItem(itemToShip);
-        //         if (added) {
-        //             selectedItem.setQuantity(selectedItem.getQuantity()-1);
-        //             if (selectedItem.getQuantity() == 0) {
-        //                 gp.player.getInventory().removeItem(selectedItem);
-        //             }
-        //         } else {
-        //             gp.ui.showMessage("Shipping Bin is full!");
-        //         }
-        //     }
-        // }
 
         if (gp.inventoryOpen) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
