@@ -19,6 +19,7 @@ public class UI {
     public String message = "";
     int messageCounter = 0;
     public String currentDialogue = "";
+    public String weatherForecast = "";
     public int slotCol = 0;
     public int slotRow = 0;
 
@@ -100,6 +101,10 @@ public class UI {
             drawInventory();
             drawShippingBin();
             // return;
+        }
+
+        if (gp.tvOn) {
+            drawTVText();
         }
 
         if (messageOn) {
@@ -329,6 +334,35 @@ public class UI {
                 slotY += gp.tileSize;
             }
         }
+    }
+
+    public void drawTVText() {
+        int frameX = gp.tileSize;
+        int frameY = gp.screenHeight - gp.tileSize*4+10;
+        int width = gp.screenWidth - (gp.tileSize*2);
+        int height = gp.tileSize*3;
+        drawSubWindow(frameX, frameY, width, height);
+        g2.setFont(g2.getFont().deriveFont(Font.PLAIN,20F));
+        int textX = frameX + gp.tileSize / 2;
+        int textY = frameY + gp.tileSize / 2;
+
+        int maxWidth = width - gp.tileSize;
+        String cuacaHariIni;
+        String cuacaBesok;
+
+        if (gp.farm.getWeather().equals(Weather.Sunny)) {
+            cuacaHariIni = "cerah ceria terang benderang";
+        } else {
+            cuacaHariIni = "hujan bikin galau";
+        }
+
+        if (gp.farm.getWeatherForTomorrow().equals(Weather.Sunny)) {
+            cuacaBesok = "cerah seperti masa depan saya";
+        } else {
+            cuacaBesok = "hujan gelap seperti masa depan saya";
+        }
+        weatherForecast = "*Intro RCTI plays* Halo pemirsa, kembali lagi di Seputar Spakbor Hills dengan saya, Fav, dari desa Spakbor. Dikabarkan cuaca hari ini "+cuacaHariIni+", Sedangkan esok hari diramalkan "+cuacaBesok+". Tetap semangat! dan... sampai jumpa! *Outro RCTI plays*";
+        drawWrappedText(weatherForecast, textX, textY, maxWidth);
     }
 
 

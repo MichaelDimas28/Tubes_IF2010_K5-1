@@ -76,6 +76,10 @@ public class NPC {
         hasVisitedToday = false;
     }
 
+    public List<String> getDialogues() {
+        return dialogues;
+    }
+
     public boolean getHasTalked() {
         return hasTalkedToday;
     }

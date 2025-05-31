@@ -40,16 +40,14 @@ public class GamePanel extends JPanel implements Runnable {
     public ItemManager itemManager = new ItemManager();
     public NPCManager npcManager = new NPCManager(this);
     public FishingManager fishingManager = new FishingManager(this);
-    public Player player = new Player("Test", Gender.Male, 100, 1000, this, keyH);
+    public Player player = new Player("Test", Gender.Male, this, keyH);
     public Store store = new Store(this);
-    // public int gameState;
-    // public final int playState = 1;
-    // public final int pauseState = 2;
-    // public final int dialogueState = 3;
+    
     public boolean gamePaused = false;
     public boolean dialogueOn = false;
     public boolean inventoryOpen = false;
     public boolean binOpen = false;
+    public boolean tvOn = false;
 
     public boolean cookingMenuActive = false;
 

@@ -302,9 +302,9 @@ public class KeyHandler implements KeyListener{
                 int index = gp.ui.slotRow * 13 + gp.ui.slotCol;
                 if (index < gp.player.getInventory().totalItems()) {
                     InventoryItem selectedItem = gp.player.getInventory().getItems().get(index);
-                    System.out.println("Selected item: " + selectedItem.getItem().getItemName() +
-                   ", Quantity: " + selectedItem.getQuantity() +
-                   ", SellPrice: " + selectedItem.getItem().getSellPrice());
+                //     System.out.println("Selected item: " + selectedItem.getItem().getItemName() +
+                //    ", Quantity: " + selectedItem.getQuantity() +
+                //    ", SellPrice: " + selectedItem.getItem().getSellPrice());
 
                     if (selectedItem != null && selectedItem.getQuantity() > 0) {
 
@@ -340,6 +340,14 @@ public class KeyHandler implements KeyListener{
             if (code == KeyEvent.VK_SPACE) {
                 gp.binOpen = false;
             }
+            return;
+        }
+
+        if (gp.tvOn) {
+            if (code == KeyEvent.VK_SPACE) {
+                gp.tvOn = false;
+            }
+            gp.farm.getTime().skipTime(15, null);
             return;
         }
 
@@ -396,6 +404,9 @@ public class KeyHandler implements KeyListener{
             }
             if (tileName != null && Arrays.asList("222.png","211.png","200.png","233.png","244.png","255.png").contains(tileName)) {
                 gp.binOpen = true;
+            }
+            if (tileName != null && Arrays.asList("468.png", "469.png").contains(tileName)) {
+                gp.tvOn = true;
             }
             spacePressed = true;
         }
