@@ -1174,24 +1174,7 @@ public class UI {
         g2.setFont(arial_40 != null ? arial_40.deriveFont(20F) : new Font("Arial", Font.PLAIN, 20));
         g2.drawString("Selamat datang di Spakbor Hills!", x, y);
         y += lineHeight;
-        g2.drawString("Tujuanmu adalah menjadi petani sukses dan mungkin...", x, y);
-        y += lineHeight;
-        g2.drawString("menemukan cinta sejati di desa ini!", x, y);
-        y += lineHeight * 1.5;
-        g2.drawString("Gunakan W,A,S,D untuk bergerak.", x, y);
-        y += lineHeight;
-        g2.drawString("SPACE untuk berinteraksi dengan objek atau NPC.", x, y);
-        y += lineHeight;
-        g2.drawString("I untuk membuka/menutup inventory.", x, y);
-        y += lineHeight;
-        g2.drawString("ENTER untuk menggunakan alat yang dipegang.", x, y);
-        y += lineHeight;
-        g2.drawString("P untuk pause game.", x, y);
-        y += lineHeight;
-        g2.drawString("C (di rumah, depan kompor) untuk membuka menu masak.", x, y);
-        y += lineHeight * 2;
-        g2.setColor(Color.YELLOW);
-        g2.drawString("Tekan ESC untuk kembali ke Menu Utama.", x, y);
+        g2.drawString("Baca Readme Saja Kak :)", x, y);
     }
 
     public void drawMessage(Graphics2D g2_param) {
