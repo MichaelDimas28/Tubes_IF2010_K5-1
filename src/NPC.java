@@ -30,6 +30,7 @@ public class NPC {
     private List<Items> lovedItems;
     private List<Items> likedItems;
     private List<Items> hatedItems;
+    public boolean proposedToday = false;
     public static final int MAX_HEART_POINTS = 150;
     // private static List<NPC> listOfNPC = new ArrayList<>();
 

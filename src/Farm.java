@@ -61,6 +61,7 @@ public class Farm {
             gp.npcManager.npcs[i].setHasGift(false);
             gp.npcManager.npcs[i].setHasTalked(false);
             gp.npcManager.npcs[i].setHasVisited(false);
+            gp.npcManager.npcs[i].proposedToday = false;
         }
         if (gp.player.getEnergy() <= 0){
             gp.player.setEnergy(10);
@@ -81,8 +82,9 @@ public class Farm {
         }
 
         gp.player.setGold(gp.player.getGold()+gp.farm.getShippingBin().calculatePrice());
+        gp.player.addTotalIncome(gp.farm.getShippingBin().calculatePrice());
+        gp.player.expenditures[gp.farm.getDay()] = gp.farm.getShippingBin().calculatePrice();
         gp.farm.getShippingBin().clearShippingBin();
-        
     }
     }
 

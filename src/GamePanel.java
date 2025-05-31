@@ -61,12 +61,11 @@ public class GamePanel extends JPanel implements Runnable {
         gameClockTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!gamePaused && !inventoryOpen && !dialogueOn  && !binOpen && !tvOn && !sleepMenuOn && !cookingMenuActive) {
-                    farm.getTime().skipTime(5, farm);
-                    farm.checkPassiveActions(player);
-                } else {
-                    farm.getTime().skipTime(0, farm);
-                }
+            if (!gamePaused && !inventoryOpen && !dialogueOn && !binOpen && !tvOn && !sleepMenuOn && !cookingMenuActive) { // Tambahkan kondisi jika game bisa pause
+                farm.getTime().skipTime(5, farm); // Tambah 5 menit per 1 detik
+            } else {
+                farm.getTime().skipTime(0, farm); // Waktu berhenti ketika membuka inventory dan pause dan berbicara dengan NPC
+            }
             }
         });
         gameClockTimer.start();

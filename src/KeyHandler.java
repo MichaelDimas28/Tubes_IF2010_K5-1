@@ -14,6 +14,7 @@ public class KeyHandler implements KeyListener{
     public boolean enterPressed;
     public boolean spacePressed;
     public boolean iPressed;
+    public boolean fPressed;
     
 
     public KeyHandler (GamePanel gp) {
@@ -450,7 +451,14 @@ public class KeyHandler implements KeyListener{
         if (code == KeyEvent.VK_I) {
             iPressed = true;
         }
+        if (code == KeyEvent.VK_F) {
+            fPressed = true;
+        }
+        if (code == KeyEvent.VK_G) {
+        gp.player.setGold(gp.player.getGold() + 1000);
+        gp.ui.showMessage("+1000g (Cheat Activated)");
     }
+}
     @Override
     public void keyReleased(KeyEvent e) {
         int code = e.getKeyCode();
@@ -466,6 +474,9 @@ public class KeyHandler implements KeyListener{
         }
         if (code == KeyEvent.VK_D || code == KeyEvent.VK_RIGHT) {
             rightPressed = false;
+        }
+        if (code == KeyEvent.VK_F) {
+            fPressed = false;
         }
         if (code == KeyEvent.VK_ENTER) {
             enterPressed = false;
