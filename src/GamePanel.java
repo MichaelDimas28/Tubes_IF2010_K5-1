@@ -9,27 +9,23 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-
-
 public class GamePanel extends JPanel implements Runnable {
-    final int originalTileSize = 16; // 16px untuk setiap pixel
-    final int scale = 3; // Agar ukuran pixel menjadi 48px
-    
+    final int originalTileSize = 16;
+    final int scale = 3;
+
     public final int tileSize = originalTileSize * scale;
     final int maxScreenCol = 16;
     final int maxScreenRow = 12;
-    final int screenWidth = tileSize * maxScreenCol; // 768 pixel
-    final int screenHeight = tileSize * maxScreenRow; // 576 pixel
-    // final int FPS = 60;
-    
-    // World Settings
+    final int screenWidth = tileSize * maxScreenCol;
+    final int screenHeight = tileSize * maxScreenRow;
+
     public int maxWorldCol;
     public int maxWorldRow;
-    public final int maxMap = 13; // Total jumlah map yang ada
+    public final int maxMap = 13;
     public int currentMap = 0;
     public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
-    
+
     Timer gameClockTimer;
     Farm farm = new Farm(this, Weather.Sunny, 1, Season.Spring, new Time(6, 0), new ShippingBin());
     TileManager tileM = new TileManager(this);
@@ -42,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     public FishingManager fishingManager = new FishingManager(this);
     public Player player = new Player("Test", Gender.Male, this, keyH);
     public Store store = new Store(this);
-    
+
     public boolean gamePaused = false;
     public boolean dialogueOn = false;
     public boolean inventoryOpen = false;
@@ -51,6 +47,12 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean sleepMenuOn = false;
 
     public boolean cookingMenuActive = false;
+
+    public static final int MAIN_MENU_STATE = 0;
+    public static final int GAMEPLAY_STATE = 1;
+    public static final int HELP_STATE = 2;
+
+    public int currentGameState = MAIN_MENU_STATE;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
@@ -61,21 +63,37 @@ public class GamePanel extends JPanel implements Runnable {
         gameClockTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (!gamePaused && !inventoryOpen && !dialogueOn && !binOpen && !tvOn && !sleepMenuOn && !cookingMenuActive) { // Tambahkan kondisi jika game bisa pause
-                farm.getTime().skipTime(5, farm); // Tambah 5 menit per 1 detik
-            } else {
-                farm.getTime().skipTime(0, farm); // Waktu berhenti ketika membuka inventory dan pause dan berbicara dengan NPC
-            }
+            if (currentGameState == GAMEPLAY_STATE && !gamePaused && !inventoryOpen && !dialogueOn && !cookingMenuActive) {
+                    farm.getTime().skipTime(5, farm);
+                    if (farm != null && player != null) {
+                        farm.checkPassiveActions(player);
+                    }
+                }
             }
         });
-        gameClockTimer.start();
     }
 
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
     }
-    
+
+    public void setupGame() {
+        currentGameState = GAMEPLAY_STATE;
+        if (!gameClockTimer.isRunning()) {
+            gameClockTimer.start();
+        }
+        gamePaused = false;
+        dialogueOn = false;
+        inventoryOpen = false;
+        binOpen = false;
+        cookingMenuActive = false;
+        if (ui != null) {
+            ui.emilyMenuActive = false;
+            ui.emilyStoreActive = false;
+        }
+    }
+
     @Override
     public void run() {
         double drawInterval = 1000000000 / 60;
@@ -95,66 +113,78 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void update() {
-        if (keyH.pPressed) {
-            gamePaused = !gamePaused;
-            keyH.pPressed = false;
-            if (gamePaused) {
-                inventoryOpen = false;
-                binOpen = false;
-                cookingMenuActive = false;
-                dialogueOn = false;
+        if (currentGameState == MAIN_MENU_STATE) {
+        } else if (currentGameState == HELP_STATE) {
+        } else if (currentGameState == GAMEPLAY_STATE) {
+            if (keyH.pPressed) {
+                gamePaused = !gamePaused;
+                keyH.pPressed = false;
+                if (gamePaused) {
+                    inventoryOpen = false;
+                    binOpen = false;
+                    cookingMenuActive = false;
+                    dialogueOn = false;
+                    if (ui != null) {
+                        ui.emilyMenuActive = false;
+                        ui.emilyStoreActive = false;
+                    }
+                }
             }
-   
-        }
 
-        if (keyH.iPressed) {
-            inventoryOpen = !inventoryOpen;
-            keyH.iPressed = false;
-        }
+            if (keyH.iPressed && !gamePaused && !cookingMenuActive && !dialogueOn && !ui.emilyMenuActive && !ui.emilyStoreActive && !binOpen) {
+                inventoryOpen = !inventoryOpen;
+                keyH.iPressed = false;
+                if (inventoryOpen) {
+                }
+            }
 
-        if (!gamePaused && !inventoryOpen && !binOpen && !cookingMenuActive && !dialogueOn && !sleepMenuOn) {
-            player.update();
-        }
-
-        
-        if (keyH.iPressed && !gamePaused && !cookingMenuActive && !dialogueOn) {
-            inventoryOpen = !inventoryOpen;
-            keyH.iPressed = false;
-            if (inventoryOpen) {
-                binOpen = false;
-                cookingMenuActive = false;
-                dialogueOn = false;
+            if (!gamePaused && !inventoryOpen && !binOpen && !cookingMenuActive && !dialogueOn && !ui.emilyMenuActive && !ui.emilyStoreActive) {
+                 if (player != null) player.update();
+            }
+            if (ui != null && ui.messageOn) {
+                ui.messageCounter++;
+                if (ui.messageCounter > 120) {
+                    ui.messageCounter = 0;
+                    ui.messageOn = false;
+                }
+            }
         }
     }
-    }
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D)g;
 
-        if (gamePaused) {
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 48));
-            g.drawString("PAUSED", screenWidth / 2 - 100, screenHeight / 2);
-        } else if (cookingMenuActive) {
-            g2.setColor(new Color(10, 10, 30, 245));
-            g2.fillRect(0, 0, screenWidth, screenHeight);
-            ui.drawCookingMenu(g2);
-        } else if (inventoryOpen) {
-            ui.drawInventory();
-            ui.drawHeldItemsInventory();
-            tileM.draw(g2);
-            farm.drawFarm(g2);
-            player.draw(g2);
-            npcManager.draw(g2);
-            ui.draw(g2);
-        } else{
-            tileM.draw(g2);
-            farm.drawFarm(g2);
-            player.draw(g2);
-            npcManager.draw(g2);
-            ui.draw(g2);
+        if (currentGameState == MAIN_MENU_STATE) {
+            ui.drawMainMenu(g2);
+        } else if (currentGameState == HELP_STATE) {
+            ui.drawHelpScreen(g2);
+        } else if (currentGameState == GAMEPLAY_STATE) {
+            if (gamePaused) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 48));
+                g.drawString("PAUSED", screenWidth / 2 - 100, screenHeight / 2);
+            } else if (cookingMenuActive) {
+                g2.setColor(new Color(10, 10, 30, 245));
+                g2.fillRect(0, 0, screenWidth, screenHeight);
+                ui.drawCookingMenu(g2);
+            } else if (inventoryOpen) {
+                ui.drawInventory();
+                ui.drawHeldItemsInventory();
+                tileM.draw(g2);
+                farm.drawFarm(g2);
+                player.draw(g2);
+                npcManager.draw(g2);
+                ui.draw(g2);
+            } else{
+                tileM.draw(g2);
+                farm.drawFarm(g2);
+                player.draw(g2);
+                npcManager.draw(g2);
+                ui.draw(g2);
+            }
+            g2.dispose();
         }
-        g2.dispose();
     }
 }
