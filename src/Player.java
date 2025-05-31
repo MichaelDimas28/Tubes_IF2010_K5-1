@@ -186,6 +186,31 @@ public class Player implements Action {
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Pickaxe"), 1));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip Seeds"), 15));
         inventory.addItem(new InventoryItem(gp.itemManager.getItem("Parsnip"), 10));
+        Items wheatItem = gp.itemManager.getItem("Wheat");
+    if (wheatItem != null) {
+        inventory.addItem(new InventoryItem(wheatItem, 9)); // Beri 5 Wheat (butuh 3)
+    } else {
+        System.err.println("Error di Player.setItems(): Item 'Wheat' tidak ditemukan di ItemManager.");
+    }
+
+    Items ikan = gp.itemManager.getItem("Salmon");
+    if (ikan != null) {
+        inventory.addItem(new InventoryItem(ikan, 10)); // Beri 2 Firewood (butuh 1)
+    }
+
+    Items firewoodItem = gp.itemManager.getItem("Firewood");
+    if (firewoodItem != null) {
+        inventory.addItem(new InventoryItem(firewoodItem, 3)); // Beri 2 Firewood (butuh 1)
+    } else {
+        System.err.println("Error di Player.setItems(): Item 'Firewood' tidak ditemukan di ItemManager.");
+    }
+    Items coalItem = gp.itemManager.getItem("Coal");
+    if (coalItem != null) {
+        inventory.addItem(new InventoryItem(coalItem, 1)); // Beri 1 Coal
+    } else {
+        System.err.println("Error di Player.setItems(): Item 'Coal' tidak ditemukan di ItemManager.");
+    }
+
     }
     
     public void update() {
@@ -1021,6 +1046,7 @@ public class Player implements Action {
 
     public void addFishCaught(int fish){
         fish_caught += fish;
+        checkAndUnlockRecipes(); 
     }
 
     //Coordinate
