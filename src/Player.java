@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 // import java.util.HashMap;
+import java.util.Arrays;
 
 public class Player implements Action {
     public int worldX, worldY;
@@ -53,7 +54,6 @@ public class Player implements Action {
     private int energy = 100;
     private int gold;
     private Items itemHeld = null;
-    private Maps currentMap = null;
     private int total_income = 0;
     private int total_expenditure = 0;
     private float avarage_season_income = 0;
@@ -76,16 +76,16 @@ public class Player implements Action {
         this.gold = gold;
         this.gp = gp;
         this.keyH = keyH;
-
+        
         screenX = gp.screenWidth/2 - (gp.tileSize/2);
         screenY = gp.screenHeight/2 - (gp.tileSize/2);
-
+        
         solidArea = new Rectangle();
         solidArea.x = 1;
         solidArea.y = 1;
         solidArea.width = 46;
         solidArea.height = 46;
-
+        
         setDefaultValues(gp.tileSize*14, gp.tileSize*15, "down");
         getPlayerImage();
         getPlayerHoeImage();
@@ -93,14 +93,14 @@ public class Player implements Action {
         getPlayerFishingImage();
         setItems();
     }
-
+    
     public void setDefaultValues(int worldX, int worldY, String direction) {
         this.worldX = worldX;
         this.worldY = worldY;
         speed = 4;
         this.direction = direction;
     }
-
+    
     public void getPlayerImage() {
         up1 = setup("char_up_1.png", gp.tileSize, gp.tileSize);
         up2 = setup("char_up_2.png", gp.tileSize, gp.tileSize);
@@ -115,7 +115,7 @@ public class Player implements Action {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        
     }
     
     public void getPlayerHoeImage() {
@@ -217,7 +217,7 @@ public class Player implements Action {
 
         if (fishing) {
             fishing();
-            fish();
+            // fish();
         }
         if (!canFish) {
             fishCooldownCounter++;
@@ -226,6 +226,14 @@ public class Player implements Action {
                 fishCooldownCounter = 0;
             }
         }
+
+        // Reset animasi setelah fishing selesai
+        if (fishing && !gp.ui.fishingActive) {
+            fishing = false;
+            fishingPhase = 0;
+            spriteNum = 1; // balik ke frame idle
+        }
+
 
         if (!moving && !tilling && !watering && !fishing && !recoverLand) {
             if (keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
@@ -254,41 +262,54 @@ public class Player implements Action {
                 }
                 keyH.spacePressed = false;
             } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Hoe") && !watering && !fishing && !recoverLand) {
+                String tileName = gp.tileM.getFrontTile();
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else {
+                } else if (tileName != null && Arrays.asList("210.png").contains(tileName)) {
                     tilling = true;
                     canTill = false;
                     keyH.enterPressed = false;
+                } else {
+                    gp.ui.showMessage("Tidak dapat menggemburkan tanah!");
                 }
             } else if (itemHeld != null && keyH.enterPressed && canWater && itemHeld.getItemName().equals("Watering Can") && !tilling && !fishing && !recoverLand) {
+                String tileName = gp.tileM.getFrontTile();
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else {
+                } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
                     watering = true;
                     canWater = false;
                     keyH.enterPressed = false;
+                } else {
+                    gp.ui.showMessage("Tidak dapat menyiram!");
                 }
             } else if (itemHeld != null && keyH.enterPressed && canFish && itemHeld.getItemName().equals("Fishing Rod") && !tilling && !watering && !recoverLand) {
+                String tileName = gp.tileM.getFrontTile();
                 if (gp.currentMap != 0 && gp.currentMap != 7 && gp.currentMap != 8 && gp.currentMap != 9) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else {
+                } else if (tileName != null && Arrays.asList("136.png","154.png","189.png","192.png","197.png","198.png","279.png","281.png","282.png","283.png","285.png","286.png","287.png","289.png","290.png","448.png","450.png","451.png","452.png","453.png","454.png","455.png").contains(tileName)) {
+                    gp.fishingManager.startFishing();
                     fishing = true;
                     fishingPhase = 1; // Mulai animasi dari rod_1 dulu
                     canFish = false;
                     keyH.enterPressed = false;
+                } else {
+                    gp.ui.showMessage("Anda tidak bisa memancing di sini!");
                 }
             } else if (itemHeld != null && keyH.enterPressed && canTill && itemHeld.getItemName().equals("Pickaxe") && !tilling && !watering && !fishing) {
+                String tileName = gp.tileM.getFrontTile();
                 if (gp.currentMap != 0) {
                     forbiddenMessage = "Anda tidak bisa menggunakan "+itemHeld.getItemName()+" di sini!";
                     gp.ui.showMessage(forbiddenMessage);
-                } else {
+                } else if (tileName != null && Arrays.asList("291.png").contains(tileName)) {
                     tilling = true;
                     canTill = false;
                     keyH.enterPressed = false;
+                } else {
+                    gp.ui.showMessage("Tidak dapat recover land!");
                 }
             }
             else {
@@ -333,6 +354,40 @@ public class Player implements Action {
             }
         }
     }
+
+    // Untuk Fungsi Fishing, mengecek lokasi
+    public String locationName() {
+            switch(gp.currentMap) {
+                case 0:
+                return "Pond";
+                case 7:
+                return "Ocean";
+                case 8:
+                return "Forest River";
+                case 9:
+                return "Mountain Lake";
+                case 1:
+                return "Mayor Tadi's House";
+                case 2:
+                return "Caroline's House";
+                case 3:
+                return "Perry's House";
+                case 4:
+                return "Dasco's House";
+                case 5:
+                return "Abigail's House";
+                case 6:
+                return "Store";
+                case 10:
+                return "World Map";
+                case 11:
+                return "House";
+                case 12:
+                return "Kost";
+                default:
+                return null;
+            }
+        }
 
     // Untuk berpindah dari map ke map
     public void checkMapTransition() {
@@ -824,15 +879,6 @@ public class Player implements Action {
         itemHeld = item;
     }
 
-    //Current Maps
-    public Maps getCurrentMap(){
-        return currentMap;
-    }
-
-    public void setCurrentMap(Maps map){
-        currentMap = map;
-    }
-
     //Total Income
     public int getTotalIncome(){
         return total_income;
@@ -928,7 +974,7 @@ public class Player implements Action {
             setEnergy(getEnergy() - 5);
         }
     }
-
+    
     public void plant(Seeds seed){
         setEnergy(getEnergy() - 5);
     }
@@ -991,6 +1037,7 @@ public class Player implements Action {
                 break;
             }
         }
+
 
         if (!hasAllIngredients || fuel == null) {
             System.out.println("Gagal memasak. Bahan atau bahan bakar tidak cukup.");

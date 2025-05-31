@@ -54,6 +54,33 @@ public class Farm {
     public Season getSeason() {
         return season;
     }
+
+    public String getSeasonString() {
+        switch(getSeason()) {
+            case Spring:
+            return "Spring";
+            case Summer:
+            return "Summer";
+            case Fall:
+            return "Fall";
+            case Winter:
+            return "Winter";
+            default:
+            return null;
+        }
+    }
+
+    public String getWeatherString() {
+        switch(getWeather()) {
+            case Sunny:
+            return "Sunny";
+            case Rainy:
+            return "Rainy";
+            default:
+            return null;
+        }
+    }
+
     public ShippingBin getShippingBin() {
         return shippingBin;
     }

@@ -20,12 +20,47 @@ public class KeyHandler implements KeyListener{
     
     @Override
     public void keyTyped(KeyEvent e) {
+        if (gp.ui.fishingActive) {
+            if (Character.isDigit(e.getKeyChar())) {
+                gp.ui.fishingInput += e.getKeyChar();
+            }
+        }
         
     }
     @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
-
+        
+        if (gp.ui.fishingActive) {
+            if (code == KeyEvent.VK_BACK_SPACE && gp.ui.fishingInput.length() > 0) {
+                gp.ui.fishingInput = gp.ui.fishingInput.substring(0, gp.ui.fishingInput.length() - 1);
+            } else if (code == KeyEvent.VK_ENTER) {
+                if (!gp.ui.fishingInput.isEmpty()) {
+                    int guess = Integer.parseInt(gp.ui.fishingInput);
+                    gp.ui.fishingTriesLeft--;
+    
+                    if (guess == gp.ui.fishingTarget) {
+                        gp.ui.showMessage("Kamu menangkap: " + gp.ui.currentFishingFish.getItemName());
+                        gp.player.getInventory().addItem(new InventoryItem(gp.itemManager.getItem(gp.ui.currentFishingFish.getItemName()), 1));
+                        gp.ui.fishingActive = false;
+                        gp.gamePaused = false;
+                    } else if (gp.ui.fishingTriesLeft <= 0) {
+                        gp.ui.showMessage("Ikan berhasil lolos...");
+                        gp.ui.fishingActive = false;
+                        gp.gamePaused = false;
+                    } else {
+                        gp.ui.showMessage("Tebakan salah! Coba lagi.");
+                    }
+                    gp.ui.fishingInput = "";
+                }
+            } else if (code == KeyEvent.VK_ESCAPE) {
+                gp.ui.fishingActive = false;
+                gp.gamePaused = false;
+                gp.ui.showMessage("Memancing dibatalkan.");
+            }
+            return; // blokir input lain
+        }
+        
         if (gp.ui.emilyMenuActive) {
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
                 gp.ui.emilyMenuSelection--;
@@ -93,6 +128,9 @@ public class KeyHandler implements KeyListener{
                 }
                 return;
             }
+
+
+
 
             if (code == KeyEvent.VK_W || code == KeyEvent.VK_UP) {
                 gp.ui.emilyStoreRow--;

@@ -36,21 +36,21 @@ public class ItemManager {
 
         // Common Fish
         itemMap.put("Bullhead", new Fish("Bullhead", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Mountain Lake"), Rarity.Common, "common_fish.png"));
-        itemMap.put("Carp", new Fish("Carp", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Mountain Lake, Pond"), Rarity.Common, "common_fish.png"));
-        itemMap.put("Chub", new Fish("Chub", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Forest River, Mountain Lake"), Rarity.Common, "common_fish.png"));
+        itemMap.put("Carp", new Fish("Carp", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Mountain Lake", "Pond"), Rarity.Common, "common_fish.png"));
+        itemMap.put("Chub", new Fish("Chub", List.of("Any"), List.of(new int[]{0, 2400}), List.of("Any"), List.of("Forest River","Mountain Lake"), Rarity.Common, "common_fish.png"));
         
         // Regular Fish
         itemMap.put("Largemouth Bass", new Fish("Largemouth Bass", List.of("Any"), List.of(new int[]{600, 1800}), List.of("Any"), List.of("Mountain Lake"), Rarity.Regular, "regular_fish.png"));
-        itemMap.put("Rainbow Trout", new Fish("Rainbow Trout", List.of("Summer"), List.of(new int[]{600, 1800}), List.of("Sunny"), List.of("Mountain Lake, Forest River"), Rarity.Regular, "regular_fish.png"));
+        itemMap.put("Rainbow Trout", new Fish("Rainbow Trout", List.of("Summer"), List.of(new int[]{600, 1800}), List.of("Sunny"), List.of("Mountain Lake","Forest River"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Sturgeon", new Fish("Sturgeon", List.of("Summer", "Winter"), List.of(new int[]{600, 1800}), List.of("Any"), List.of("Mountain Lake"), Rarity.Regular, "regular_fish.png"));
-        itemMap.put("Midnight Carp", new Fish("Midnight Carp", List.of("Winter","Fall"), List.of(new int[]{2000, 2400}, new int[]{0, 200}), List.of("Any"), List.of("Mountain Lake, Pond"), Rarity.Regular, "regular_fish.png"));
+        itemMap.put("Midnight Carp", new Fish("Midnight Carp", List.of("Winter","Fall"), List.of(new int[]{2000, 2400}, new int[]{0, 200}), List.of("Any"), List.of("Mountain Lake","Pond"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Flounder", new Fish("Flounder", List.of("Spring","Summer"), List.of(new int[]{600, 2200}), List.of("Any"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Halibut", new Fish("Halibut", List.of("Any"), List.of(new int[]{600, 1100}, new int[]{1900,2400}, new int[]{0,200}), List.of("Any"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Octopus", new Fish("Octopus", List.of("Summer"), List.of(new int[]{600, 2200}), List.of("Any"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Pufferfish", new Fish("Pufferfish", List.of("Summer"), List.of(new int[]{0, 1600}), List.of("Sunny"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Sardine", new Fish("Sardine", List.of("Any"), List.of(new int[]{600, 1800}), List.of("Any"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Super Cucumber", new Fish("Super Cucumber", List.of("Summer","Fall", "Winter"), List.of(new int[]{1800, 2400}, new int[]{0,200}), List.of("Any"), List.of("Ocean"), Rarity.Regular, "regular_fish.png"));
-        itemMap.put("Catfish", new Fish("Catfish", List.of("Spring", "Summer", "Fall"), List.of(new int[]{600, 2200}), List.of("Rainy"), List.of("Forest River, Pond"), Rarity.Regular, "regular_fish.png"));
+        itemMap.put("Catfish", new Fish("Catfish", List.of("Spring", "Summer", "Fall"), List.of(new int[]{600, 2200}), List.of("Rainy"), List.of("Forest River","Pond"), Rarity.Regular, "regular_fish.png"));
         itemMap.put("Salmon", new Fish("Salmon", List.of("Fall"), List.of(new int[]{600, 1800}), List.of("Any"), List.of("Forest River"), Rarity.Regular, "regular_fish.png"));
         
         // Legendary Fish
@@ -124,6 +124,17 @@ public class ItemManager {
 
     public Map<String, Items> getItemMap() {
     return itemMap;
+    }
+
+    public Map<String, Fish> getAllFish() {
+        Map<String, Fish> allFish = new HashMap<>();
+        for (Items i: getItemMap().values()) {
+            if (i instanceof Fish && (!(i.getItemName().equals("Any Fish")) || !(i.getItemName().equals("Legend Fish")))) {
+                allFish.put(i.getItemName(), (Fish)i);
+            }
+        }
+
+        return allFish;
     }
 
 }

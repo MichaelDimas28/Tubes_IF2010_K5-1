@@ -38,6 +38,13 @@ public class Fish extends Items implements Edible {
         return timeAppear;
     }
 
+    public int fishStartAppear(int index) {
+        return timeAppear.get(index)[0];
+    }
+    public int fishStopAppear(int index) {
+        return timeAppear.get(index)[1];
+    }
+
     public List<String> getWeatherAppear() {
         return weatherAppear;
     }

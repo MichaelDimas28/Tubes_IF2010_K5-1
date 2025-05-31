@@ -25,6 +25,7 @@ public class UI {
     private Farm farm;
 
     public Map<String, List<String>> npcDialogues = new HashMap<>();
+
     public boolean emilyMenuActive = false;
     public NPC currentEmily;
     public int emilyMenuSelection = 0;
@@ -36,7 +37,15 @@ public class UI {
     public boolean confirmingPurchase = false;
     public String quantityInput = "";
     public boolean confirmYes = true;
-    
+
+    public boolean fishingActive = false;
+    public boolean fishingGuessing = false;
+    public String fishingInput = "";
+    public int fishingTarget = -1;
+    public int fishingMaxNumber = 0;
+    public int fishingTriesLeft = 0;
+    public Fish currentFishingFish = null;
+
     public UI (GamePanel gp, Farm farm) {
         this.gp = gp;
         arial_40 = new Font("Arial", Font.PLAIN, 40);
@@ -144,9 +153,10 @@ public class UI {
                 }
                 g2.drawString(options[i], frameX + 20, frameY + 50 + i * 40);
             }
-
-
-
+        }
+        if (fishingActive) {
+            drawFishingGuessBox(g2);
+            return;
         }
     }
 
@@ -470,6 +480,27 @@ public class UI {
         emilyStoreActive = false;
         quantityInput = "";
     }
+
+    public void drawFishingGuessBox(Graphics2D g2) {
+        if (!fishingActive || currentFishingFish == null) return;
+
+        int frameX = gp.tileSize * 4;
+        int frameY = gp.tileSize * 4;
+        int width = gp.tileSize * 8;
+        int height = gp.tileSize * 4;
+
+        drawSubWindow(frameX, frameY, width, height);
+
+        g2.setColor(Color.white);
+        g2.setFont(arial_40.deriveFont(20f));
+        g2.drawString("Tebak Angka (1-" + fishingMaxNumber + ")", frameX + 20, frameY + 40);
+        g2.drawString("Sisa percobaan: " + fishingTriesLeft, frameX + 20, frameY + 70);
+        g2.drawString("Tebakan: " + fishingInput, frameX + 20, frameY + 100);
+
+        g2.setColor(Color.yellow);
+        g2.drawString("ENTER = OK   |   ESC = Cancel", frameX + 20, frameY + 140);
+    }
+
 
 
     public List<Items> getCurrentSeasonStoreItems() {
